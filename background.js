@@ -1,15 +1,26 @@
-const DESIRED_TAB_PROPERTIES = ['active', 'favIconUrl', 'index', 'pinned', 'title', 'url', 'windowId', 'id'];
+const TAB_PROPERTIES = [
+  'active',
+  'favIconUrl',
+  'index',
+  'pinned',
+  'title',
+  'url',
+  'windowId',
+  'id',
+];
+const TABBY_URL = 'tabs.html';
 
-function currentWindowTabs() {
-  return browser.tabs.query({});
-}
+browser.runtime.onMessage.addListener((msg, sender) => {
+  if (msg === 'get_tabs') {
+    return Promise.resolve(listTabs());
+  }
+});
 
-async function listTabs() {
-  const tabList = await currentWindowTabs();
+function filterList(tabList) {
   const filteredList = [];
   for (const tab of tabList) {
     const filteredTab = {};
-    for (const prop of DESIRED_TAB_PROPERTIES) {
+    for (const prop of TAB_PROPERTIES) {
       filteredTab[prop] = tab[prop];
     }
     filteredList.push(filteredTab);
@@ -17,21 +28,16 @@ async function listTabs() {
   return filteredList;
 }
 
-function onCreated(tab) {
-  console.log(`Created a new tab: ${tab.id}`);
+async function listTabs() {
+  const tabList = await browser.tabs.query({});
+  return filterList(tabList);
 }
 
 function onError(err) {
   console.error(`Error: ${error}`);
 }
 
-browser.browserAction.onClicked.addListener(() => {
-  const tabs = listTabs();
-  browser.runtime.sendMessage({
-    msg: 'Donezo'
-  });
-  var creating = browser.tabs.create({
-    url: 'tabs.html'
-  });
-  creating.then(onCreated, onError);
+browser.browserAction.onClicked.addListener(async () => {
+  const tabs = await listTabs();
+  await browser.tabs.create({ url: TABBY_URL });
 });
