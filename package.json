@@ -31,5 +31,8 @@
   },
   "alias": {
     "vue": "./node_modules/vue/dist/vue.common.js"
-  }
+  },
+  "browserslist": [
+    "since 2017-06"
+  ]
 }
