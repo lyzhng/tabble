@@ -3,10 +3,7 @@
   "name": "Borderify",
   "version": "1.0",
   "description": "Adds a red border to all webpages matching mozilla.org.",
-  "permissions": [
-    "<all_urls>",
-    "tabs"
-  ],
+  "permissions": ["<all_urls>", "tabs"],
   "background": {
     "scripts": ["background.js"]
   },
@@ -14,6 +11,14 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "borderify@example.com"
+    }
+  },
+  "commands": {
+    "open": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y"
+      },
+      "description": "Opens a new tab to display all of your tabs"
     }
   }
 }
