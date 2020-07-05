@@ -3,7 +3,7 @@
     <h1>{{ greeting }}</h1>
     <div v-for="t in tabs">
       <img v-bind:src="t.favIconUrl" alt="favicon" width="16px" height="16px" />
-      <a :href="t.url" @click.prevent="goToTab(t.id)">{{ t.title }}</a>
+      <a :href="t.url" @click.prevent="goToTab(t.windowId, t.id)">{{ t.title }}</a>
     </div>
   </div>
 </template>
@@ -25,9 +25,9 @@ export default {
       const tabList = await browser.runtime.sendMessage('get_tabs');
       this.tabs = tabList;
     },
-    goToTab: async function (tabId) {
-      console.log('tabid', tabId);
+    goToTab: async function (windowId, tabId) {
       await browser.tabs.update(tabId, { active: true });
+      await browser.windows.update(windowId, { focused: true });
     },
   },
 };
