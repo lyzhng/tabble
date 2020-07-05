@@ -8,7 +8,7 @@ const TAB_PROPERTIES = [
   'windowId',
   'id',
 ];
-const TABBY_URL = 'tabs.html';
+const TABBY_URL = 'index.html';
 
 browser.runtime.onMessage.addListener((msg, sender) => {
   if (msg === 'get_tabs') {
