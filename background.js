@@ -8,7 +8,9 @@ const TAB_PROPERTIES = [
   'windowId',
   'id',
 ];
-const TABBY_URL = 'index.html';
+
+const TABBLE_REL_URL = 'index.html';
+const TABBLE_EXT_URL = browser.runtime.getURL(TABBLE_REL_URL);
 
 function filterList(tabList) {
   const filteredList = [];
@@ -27,9 +29,14 @@ async function listTabs() {
   return filterList(tabList);
 }
 
-async function openTabby() {
+async function openTabble() {
   const tabs = await listTabs();
-  await browser.tabs.create({ url: TABBY_URL });
+  for (const t of tabs) {
+    if (t.url === TABBLE_EXT_URL) {
+      await browser.tabs.remove(t.id);
+    }
+  }
+  await browser.tabs.create({ url: TABBLE_REL_URL });
 }
 
 browser.runtime.onMessage.addListener((msg, sender) => {
@@ -39,11 +46,11 @@ browser.runtime.onMessage.addListener((msg, sender) => {
 });
 
 browser.browserAction.onClicked.addListener(async () => {
-  await openTabby();
+  await openTabble();
 });
 
 browser.commands.onCommand.addListener(async (command) => {
   if (command === 'open') {
-    await openTabby();
+    await openTabble();
   }
 });
