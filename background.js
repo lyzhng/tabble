@@ -10,12 +10,6 @@ const TAB_PROPERTIES = [
 ];
 const TABBY_URL = 'index.html';
 
-browser.runtime.onMessage.addListener((msg, sender) => {
-  if (msg === 'get_tabs') {
-    return Promise.resolve(listTabs());
-  }
-});
-
 function filterList(tabList) {
   const filteredList = [];
   for (const tab of tabList) {
@@ -33,11 +27,23 @@ async function listTabs() {
   return filterList(tabList);
 }
 
-function onError(err) {
-  console.error(`Error: ${error}`);
-}
-
-browser.browserAction.onClicked.addListener(async () => {
+async function openTabby() {
   const tabs = await listTabs();
   await browser.tabs.create({ url: TABBY_URL });
+}
+
+browser.runtime.onMessage.addListener((msg, sender) => {
+  if (msg === 'get_tabs') {
+    return listTabs();
+  }
+});
+
+browser.browserAction.onClicked.addListener(async () => {
+  await openTabby();
+});
+
+browser.commands.onCommand.addListener(async (command) => {
+  if (command === 'open') {
+    await openTabby();
+  }
 });

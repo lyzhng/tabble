@@ -35,9 +35,9 @@ export default {
       const { tabs, windowTabMapping } = this;
       tabs.forEach((t) => {
         if (!(t.windowId in windowTabMapping)) {
-          this.$set(this.windowTabMapping, t.windowId, [t]);
+          this.$set(windowTabMapping, t.windowId, [t]);
         } else {
-          this.$set(this.windowTabMapping, t.windowId, [...this.windowTabMapping[t.windowId], t]);
+          this.$set(windowTabMapping, t.windowId, [...windowTabMapping[t.windowId], t]);
         }
       });
     },
