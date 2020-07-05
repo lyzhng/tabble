@@ -5,7 +5,31 @@
   "repository": "git@github.com:lyzhng/tabble.git",
   "author": "Lily Zhong <lilyzhongy@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "start": "parcel tabs.html",
+    "build": "parcel build tabs.html",
+    "build:manifest": "parcel manifest.json",
+    "serve": "serve dist"
+  },
   "devDependencies": {
-    "prettier": "^2.0.5"
+    "@vue/component-compiler-utils": "^3.1.2",
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
+    "parcel-bundler": "^1.12.4",
+    "parcel-plugin-web-extension": "^1.6.1",
+    "prettier": "^2.0.5",
+    "sass": "^1.26.9",
+    "serve": "^11.3.2",
+    "vue-hot-reload-api": "^2.3.4",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "dependencies": {
+    "@vue/cli": "^4.4.6",
+    "vue": "^2.0.0",
+    "vuex": "^3.5.1"
+  },
+  "alias": {
+    "vue": "./node_modules/vue/dist/vue.common.js"
   }
 }
