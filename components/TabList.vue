@@ -1,9 +1,12 @@
 <template>
   <div>
     <h1>{{ greeting }}</h1>
-    <div v-for="t in tabs">
-      <img v-bind:src="t.favIconUrl" alt="favicon" width="16px" height="16px" />
-      <a :href="t.url" @click.prevent="goToTab(t.windowId, t.id)">{{ t.title }}</a>
+    <div v-for="(tabList, windowId) in windowTabMapping">
+      <h2>{{ windowId }}</h2>
+      <div v-for="t in tabList">
+        <img v-bind:src="t.favIconUrl" alt="favicon" width="16px" height="16px" />
+        <a :href="t.url" @click.prevent="switchTabAndWindow(t.windowId, t.id)">{{ t.title }}</a>
+      </div>
     </div>
   </div>
 </template>
@@ -11,13 +14,16 @@
 <script charset="utf-8">
 export default {
   name: 'TabList',
-  mounted: function () {
-    this.getTabList();
+  mounted: async function () {
+    console.log('TabList.vue mounted!');
+    await this.getTabList();
+    this.setWindowTabMapping();
   },
   data: function () {
     return {
       greeting: 'Tabble',
       tabs: [],
+      windowTabMapping: {},
     };
   },
   methods: {
@@ -25,7 +31,17 @@ export default {
       const tabList = await browser.runtime.sendMessage('get_tabs');
       this.tabs = tabList;
     },
-    goToTab: async function (windowId, tabId) {
+    setWindowTabMapping: function () {
+      const { tabs, windowTabMapping } = this;
+      tabs.forEach((t) => {
+        if (!(t.windowId in windowTabMapping)) {
+          this.$set(this.windowTabMapping, t.windowId, [t]);
+        } else {
+          this.$set(this.windowTabMapping, t.windowId, [...this.windowTabMapping[t.windowId], t]);
+        }
+      });
+    },
+    switchTabAndWindow: async function (windowId, tabId) {
       await browser.tabs.update(tabId, { active: true });
       await browser.windows.update(windowId, { focused: true });
     },
