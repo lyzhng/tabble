@@ -1,16 +1,4 @@
-const TAB_PROPERTIES = [
-  'active',
-  'favIconUrl',
-  'index',
-  'pinned',
-  'title',
-  'url',
-  'windowId',
-  'id',
-];
-
-const TABBLE_REL_URL = 'index.html';
-const TABBLE_EXT_URL = browser.runtime.getURL(TABBLE_REL_URL);
+import { TAB_PROPERTIES, TABBLE_REL_URL, TABBLE_EXT_URL } from './constants';
 
 function filterList(tabList) {
   const filteredList = [];
@@ -39,18 +27,4 @@ async function openTabble() {
   await browser.tabs.create({ url: TABBLE_REL_URL });
 }
 
-browser.runtime.onMessage.addListener((msg, sender) => {
-  if (msg === 'get_tabs') {
-    return listTabs();
-  }
-});
-
-browser.browserAction.onClicked.addListener(async () => {
-  await openTabble();
-});
-
-browser.commands.onCommand.addListener(async (command) => {
-  if (command === 'open') {
-    await openTabble();
-  }
-});
+export { filterList, listTabs, openTabble };

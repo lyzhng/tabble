@@ -10,7 +10,7 @@ new Vue({
         template: '<App/>',
         components: { App },
     },
-    render: h => h(App),
+    render: (h) => h(App),
     mounted: function () {
         console.log('mounted!');
     },
