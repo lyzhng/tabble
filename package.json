@@ -7,8 +7,8 @@
   "license": "MIT",
   "scripts": {
     "start": "parcel run index.html",
-    "build": "parcel build index.js -o dist/index.js && parcel build index.html",
-    "build:manifest": "parcel manifest.json",
+    "build": "parcel build src/index.js -o dist/index.js && parcel build src/background.js -o dist/background.js && parcel build index.html",
+    "build-manifest": "parcel ./src/manifest.json",
     "serve": "serve dist"
   },
   "devDependencies": {
