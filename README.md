@@ -11,7 +11,3 @@ Tabble is a Firefox extension that displays all your tabs in a single tab, other
 
 ## :package:  Installation
 Not up for deployment yet.
-
-## :construction:  Plans
-- Add a keybinding that allows you to jump back to this tab so clicking on the addon icon is not necessary.
-- Allow user to create tab groups. This can be toggled so there's flexibility.
