@@ -1,8 +1,6 @@
-import { listTabs, openTabble } from './utils/helper.js';
+import { listTabs, openTabble, checkTabble } from './utils/helper.js';
+import { GET_TABS_MSG, SEND_TABS_MSG, OPEN_CMD, TABBLE_EXT_URL } from './utils/constants.js';
 
-browser.runtime.onMessage.addListener((msg, sender) => {
-  if (msg === 'get_tabs') {
-    return listTabs();
   }
 });
 
@@ -11,7 +9,8 @@ browser.browserAction.onClicked.addListener(async () => {
 });
 
 browser.commands.onCommand.addListener(async (command) => {
-  if (command === 'open') {
+  if (command === OPEN_CMD) {
     await openTabble();
   }
 });
+

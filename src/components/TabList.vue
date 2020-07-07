@@ -12,6 +12,8 @@
 </template>
 
 <script charset="utf-8">
+import { GET_TABS_MSG } from '../utils/constants.js';
+
 export default {
   name: 'TabList',
   mounted: async function () {
@@ -28,8 +30,10 @@ export default {
   },
   methods: {
     getTabList: async function () {
-      const tabList = await browser.runtime.sendMessage('get_tabs');
-      this.tabs = tabList;
+      const res = await browser.runtime.sendMessage({
+        msg: GET_TABS_MSG,
+      });
+      this.tabs = res.data;
     },
     setWindowTabMapping: function () {
       const { tabs, windowTabMapping } = this;
