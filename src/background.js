@@ -21,13 +21,61 @@ browser.commands.onCommand.addListener(async (command) => {
   }
 });
 
-async function handleActivated(activeInfo) {
-  const tab = (await browser.tabs.query({ active: true }))[0];
-  console.log('[DEBUG] Activated Tab URL', tab.url);
-  if (tab.url === TABBLE_EXT_URL) {
-    console.log('[DEBUG] Tabble Activated');
-    await browser.tabs.reload(tab.id);
-  }
-}
+const filter = {
+  properties: ['title', 'favIconUrl'],
+};
 
-browser.tabs.onActivated.addListener(handleActivated);
+browser.tabs.onCreated.addListener(async (tab) => {
+  await browser.runtime.sendMessage({
+    msg: 'create',
+    data: {
+      tab,
+    },
+  });
+});
+
+browser.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
+  const { windowId } = removeInfo;
+  await browser.runtime.sendMessage({
+    msg: 'remove',
+    data: {
+      tabId,
+      windowId,
+    },
+  });
+});
+
+browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  await browser.runtime.sendMessage({
+    msg: 'update',
+    data: {
+      tabId,
+      tab,
+    },
+  });
+}, filter);
+
+browser.tabs.onMoved.addListener((tabId, moveInfo) => {
+  const { windowId, fromIndex, toIndex } = moveInfo;
+  browser.runtime.sendMessage({
+    msg: 'move',
+    data: {
+      tabId,
+      windowId,
+      fromIndex,
+      toIndex,
+    },
+  });
+});
+
+browser.tabs.onAttached.addListener((tabId, attachInfo) => {
+  const { newWindowId, newPosition } = moveInfo;
+  browser.runtime.sendMessage({
+    msg: 'attach',
+    data: {
+      tabId,
+      newWindowId,
+      newPosition,
+    },
+  });
+});
