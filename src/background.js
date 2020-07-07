@@ -55,11 +55,13 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   });
 }, filter);
 
-browser.tabs.onMoved.addListener((tabId, moveInfo) => {
+browser.tabs.onMoved.addListener(async (tabId, moveInfo) => {
   const { windowId, fromIndex, toIndex } = moveInfo;
-  browser.runtime.sendMessage({
+  const tab = await browser.tabs.get(tabId);
+  await browser.runtime.sendMessage({
     msg: 'move',
     data: {
+      tab,
       tabId,
       windowId,
       fromIndex,
@@ -68,9 +70,7 @@ browser.tabs.onMoved.addListener((tabId, moveInfo) => {
   });
 });
 
-browser.tabs.onAttached.addListener((tabId, attachInfo) => {
   const { newWindowId, newPosition } = moveInfo;
-  browser.runtime.sendMessage({
     msg: 'attach',
     data: {
       tabId,

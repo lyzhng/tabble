@@ -81,6 +81,18 @@ export default {
           this.$set(this.tabs, tabIndexInArr, tab);
           this.$set(this.windowTabMapping[tab.windowId], tabIndexInMap, tab);
         }
+        if (msg === 'move') {
+          const { tab, tabId, windowId, fromIndex, toIndex } = data;
+          const tabsInWindow = this.windowTabMapping[windowId];
+          const tabIndexInArr = this.tabs.findIndex((t) => t.id === tabId);
+          this.$delete(this.tabs, tabIndexInArr);
+          this.tabs.splice(toIndex, 0, tab);
+          const tabIndexInMap = tabsInWindow.findIndex((t) => t.id === tabId);
+          this.$delete(tabsInWindow, tabIndexInMap);
+          tabsInWindow.splice(toIndex, 0, tab);
+        }
+        if (msg === 'attach') {
+          const { tabId, newWindowId, newPosition } = data;
         }
       });
     },
