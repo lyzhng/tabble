@@ -6,8 +6,8 @@
   "author": "Lily Zhong <lilyzhongy@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "parcel run index.html",
-    "build": "parcel build src/index.js -o dist/index.js && parcel build src/background.js -o dist/background.js && parcel build index.html",
+    "start": "parcel run src/index.html src/background.js --public-url '.'",
+    "build": "parcel build src/index.html src/background.js --public-url '.'",
     "build-manifest": "parcel ./src/manifest.json",
     "serve": "serve dist"
   },

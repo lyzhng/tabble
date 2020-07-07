@@ -9,7 +9,7 @@ const TAB_PROPERTIES = [
     'id',
 ];
 
-const TABBLE_REL_URL = 'index.html';
+const TABBLE_REL_URL = '../dist/index.html';
 const TABBLE_EXT_URL = browser.runtime.getURL(TABBLE_REL_URL);
 
 const GET_TABS_MSG = 'get_tabs';
