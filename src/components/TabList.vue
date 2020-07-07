@@ -18,6 +18,7 @@ export default {
   name: 'TabList',
   mounted: async function () {
     console.log('TabList.vue mounted!');
+    this.initMsgHandler();
     await this.getTabList();
     this.setWindowTabMapping();
   },
@@ -48,6 +49,28 @@ export default {
     switchTabAndWindow: async function (windowId, tabId) {
       await browser.tabs.update(tabId, { active: true });
       await browser.windows.update(windowId, { focused: true });
+    },
+    initMsgHandler: function () {
+      browser.runtime.onMessage.addListener((req, sender) => {
+        console.log(req);
+        const { msg, data } = req;
+        if (msg === 'create') {
+          const { tab } = data;
+          const { windowId, index } = tab;
+          this.tabs.push(tab);
+          if (!(windowId in this.windowTabMapping)) {
+            this.$set(this.windowTabMapping, windowId, [tab]);
+          } else {
+            this.windowTabMapping[windowId].splice(index, 0, tab);
+          }
+        }
+        if (msg === 'remove') {
+          const { tabId, windowId } = data;
+          this.tabs = this.tabs.filter((t) => t.id !== tabId);
+          const tabsInWindow = this.windowTabMapping[windowId].filter((t) => t.id !== tabId);
+          this.$set(this.windowTabMapping, windowId, tabsInWindow);
+        }
+      });
     },
   },
 };
