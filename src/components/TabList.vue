@@ -69,6 +69,10 @@ export default {
           this.tabs = this.tabs.filter((t) => t.id !== tabId);
           const tabsInWindow = this.windowTabMapping[windowId].filter((t) => t.id !== tabId);
           this.$set(this.windowTabMapping, windowId, tabsInWindow);
+          if (this.windowTabMapping[windowId].length === 0) {
+            delete this.windowTabMapping[windowId];
+          }
+        }
         }
       });
     },
