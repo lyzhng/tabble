@@ -85,14 +85,39 @@ export default {
           const { tab, tabId, windowId, fromIndex, toIndex } = data;
           const tabsInWindow = this.windowTabMapping[windowId];
           const tabIndexInArr = this.tabs.findIndex((t) => t.id === tabId);
+          const tabIndexInMap = tabsInWindow.findIndex((t) => t.id === tabId);
           this.$delete(this.tabs, tabIndexInArr);
           this.tabs.splice(toIndex, 0, tab);
-          const tabIndexInMap = tabsInWindow.findIndex((t) => t.id === tabId);
           this.$delete(tabsInWindow, tabIndexInMap);
           tabsInWindow.splice(toIndex, 0, tab);
         }
         if (msg === 'attach') {
-          const { tabId, newWindowId, newPosition } = data;
+          const { tab, tabId, newWindowId, newPosition } = data;
+          const { windowId } = this.tabs.find((t) => t.id === tabId);
+          const tabsInWindow = this.windowTabMapping[windowId];
+          const tabIndexInArr = this.tabs.findIndex((t) => t.id === tabId);
+          const tabIndexInMap = tabsInWindow.findIndex((t) => t.id === tabId);
+          this.$set(this.tabs, tabIndexInArr, tab);
+          this.$delete(tabsInWindow, tabIndexInMap);
+          if (!(newWindowId in this.windowTabMapping)) {
+            this.$set(this.windowTabMapping, newWindowId, [tab]);
+          } else {
+            this.windowTabMapping[newWindowId].splice(newPosition, 0, tab);
+          }
+        }
+        if (msg === 'detach') {
+          const { tab, oldWindowId, oldPosition } = data;
+          const { id: tabId, windowId, index } = tab;
+          const tabsInWindow = this.windowTabMapping[oldWindowId];
+          const tabIndexInArr = this.tabs.find((t) => t.id === tabId);
+          const tabIndexInMap = tabsInWindow.find((t) => t.id === tabId);
+          this.$set(this.tabs, tabIndexInArr, tab);
+          this.$delete(tabsInWindow, tabIndexInMap);
+          if (!(windowId in this.windowTabMapping)) {
+            this.$set(this.windowTabMapping, windowId, [tab]);
+          } else {
+            this.windowTabMapping[windowId].splice(index, 0, tab);
+          }
         }
       });
     },

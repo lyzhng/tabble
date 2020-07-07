@@ -71,12 +71,31 @@ browser.tabs.onMoved.addListener(async (tabId, moveInfo) => {
   });
 });
 
+browser.tabs.onAttached.addListener(async (tabId, attachInfo) => {
+  console.log('A tab has been attached!');
   const { newWindowId, newPosition } = moveInfo;
+  const tab = await browser.tabs.get(tabId);
+  await browser.runtime.sendMessage({
     msg: 'attach',
     data: {
+      tab,
       tabId,
       newWindowId,
       newPosition,
+    },
+  });
+});
+
+browser.tabs.onDetached.addListener(async (tabId, detachInfo) => {
+  console.log('A tab has been detached!');
+  const { oldWindowId, oldPosition } = detachInfo;
+  const tab = await brower.tabs.get(tabId);
+  await browser.runtime.sendMessage({
+    msg: 'detach',
+    data: {
+      tab,
+      oldWindowId,
+      oldPosition,
     },
   });
 });
