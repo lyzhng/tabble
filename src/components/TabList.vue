@@ -73,6 +73,14 @@ export default {
             delete this.windowTabMapping[windowId];
           }
         }
+        if (msg === 'update') {
+          const { tabId, tab } = data;
+          const tabsInWindow = this.windowTabMapping[tab.windowId];
+          const tabIndexInArr = this.tabs.findIndex((t) => t.id === tabId);
+          const tabIndexInMap = tabsInWindow.findIndex((t) => t.id === tabId);
+          this.$set(this.tabs, tabIndexInArr, tab);
+          this.$set(this.windowTabMapping[tab.windowId], tabIndexInMap, tab);
+        }
         }
       });
     },
