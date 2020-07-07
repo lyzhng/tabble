@@ -37,12 +37,12 @@ export default {
       this.tabs = res.data;
     },
     setWindowTabMapping: function () {
-      const { tabs, windowTabMapping } = this;
-      tabs.forEach((t) => {
-        if (!(t.windowId in windowTabMapping)) {
-          this.$set(windowTabMapping, t.windowId, [t]);
+      this.tabs.forEach((t) => {
+        if (!(t.windowId in this.windowTabMapping)) {
+          this.$set(this.windowTabMapping, t.windowId, [t]);
         } else {
-          this.$set(windowTabMapping, t.windowId, [...windowTabMapping[t.windowId], t]);
+          const tabsInWindow = this.windowTabMapping[t.windowId];
+          tabsInWindow.push(t);
         }
       });
     },
@@ -57,7 +57,7 @@ export default {
         if (msg === 'create') {
           const { tab } = data;
           const { windowId, index } = tab;
-          this.tabs.push(tab);
+          this.tabs.splice(index, 0, tab);
           if (!(windowId in this.windowTabMapping)) {
             this.$set(this.windowTabMapping, windowId, [tab]);
           } else {
@@ -66,8 +66,8 @@ export default {
         }
         if (msg === 'remove') {
           const { tabId, windowId } = data;
-          this.tabs = this.tabs.filter((t) => t.id !== tabId);
           const tabsInWindow = this.windowTabMapping[windowId].filter((t) => t.id !== tabId);
+          this.tabs = this.tabs.filter((t) => t.id !== tabId);
           this.$set(this.windowTabMapping, windowId, tabsInWindow);
           if (this.windowTabMapping[windowId].length === 0) {
             delete this.windowTabMapping[windowId];
