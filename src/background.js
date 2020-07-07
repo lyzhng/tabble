@@ -22,6 +22,7 @@ browser.commands.onCommand.addListener(async (command) => {
 });
 
 const filter = {
+  urls: ['<all_urls>'],
   properties: ['title', 'favIconUrl'],
 };
 
