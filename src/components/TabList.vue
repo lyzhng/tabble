@@ -89,31 +89,26 @@ export default {
           }
         }
         if (msg === 'update') {
-          const { tabId, tab } = data;
+          const { tab } = data;
           const tabsInWindow = this.windowTabMapping[tab.windowId];
-          const tabIndexInArr = this.tabs.findIndex((t) => t.id === tabId);
-          const tabIndexInMap = tabsInWindow.findIndex((t) => t.id === tabId);
+          const tabIndexInArr = this.tabs.findIndex((t) => t.id === tab.id);
+          const tabIndexInMap = tabsInWindow.findIndex((t) => t.id === tab.id);
           this.$set(this.tabs, tabIndexInArr, tab);
           this.$set(this.windowTabMapping[tab.windowId], tabIndexInMap, tab);
         }
         if (msg === 'move') {
-          const { tab, tabId, windowId, fromIndex, toIndex } = data;
+          const { tab, windowId, fromIndex, toIndex } = data;
           const tabsInWindow = this.windowTabMapping[windowId];
-          const tabIndexInArr = this.tabs.findIndex((t) => t.id === tabId);
-          const tabIndexInMap = tabsInWindow.findIndex((t) => t.id === tabId);
+          const tabIndexInArr = this.tabs.findIndex((t) => t.id === tab.id);
           this.$delete(this.tabs, tabIndexInArr);
           this.tabs.splice(toIndex, 0, tab);
-          this.$delete(tabsInWindow, tabIndexInMap);
+          this.$delete(tabsInWindow, fromIndex);
           tabsInWindow.splice(toIndex, 0, tab);
         }
         if (msg === 'attach') {
-          const { tab, tabId, newWindowId, newPosition } = data;
-          const { windowId } = this.tabs.find((t) => t.id === tabId);
-          const tabsInWindow = this.windowTabMapping[windowId];
-          const tabIndexInArr = this.tabs.findIndex((t) => t.id === tabId);
-          const tabIndexInMap = tabsInWindow.findIndex((t) => t.id === tabId);
+          const { tab, newWindowId, newPosition } = data;
+          const tabIndexInArr = this.tabs.findIndex((t) => t.id === tab.id);
           this.$set(this.tabs, tabIndexInArr, tab);
-          this.$delete(tabsInWindow, tabIndexInMap);
           if (!(newWindowId in this.windowTabMapping)) {
             this.$set(this.windowTabMapping, newWindowId, [tab]);
           } else {
