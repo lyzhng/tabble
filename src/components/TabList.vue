@@ -19,7 +19,12 @@ export default {
   mounted: async function () {
     console.log('TabList.vue mounted!');
     this.initMsgHandler();
-    await this.getTabList();
+    try {
+      await this.getTabList();
+    } catch (err) {
+      console.error('Error getting tab list.');
+      throw new Error('Could not retrieve tab list.');
+    }
     this.setWindowTabMapping();
   },
   data: function () {
@@ -31,10 +36,15 @@ export default {
   },
   methods: {
     getTabList: async function () {
-      const res = await browser.runtime.sendMessage({
-        msg: GET_TABS_MSG,
-      });
-      this.tabs = res.data;
+      try {
+        const res = await browser.runtime.sendMessage({
+          msg: GET_TABS_MSG,
+        });
+        this.tabs = res.data;
+      } catch (err) {
+        console.error('Error sending GET_TABS_MSG.');
+        throw new Error('Could not send GET_TABS_MSG.');
+      }
     },
     setWindowTabMapping: function () {
       this.tabs.forEach((t) => {
@@ -47,8 +57,13 @@ export default {
       });
     },
     switchTabAndWindow: async function (windowId, tabId) {
-      await browser.tabs.update(tabId, { active: true });
-      await browser.windows.update(windowId, { focused: true });
+      try {
+        await browser.tabs.update(tabId, { active: true });
+        await browser.windows.update(windowId, { focused: true });
+      } catch (err) {
+        console.error('Error switching to tab or window.');
+        throw new Error('Could not switch to tab or window.');
+      }
     },
     initMsgHandler: function () {
       browser.runtime.onMessage.addListener((req, sender) => {
