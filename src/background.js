@@ -1,7 +1,7 @@
 import { listTabs, openTabble, checkTabble } from './utils/helper.js';
 import { GET_TABS_MSG, SEND_TABS_MSG, OPEN_CMD, TABBLE_EXT_URL } from './utils/constants.js';
 
-browser.runtime.onMessage.addListener(async (req, sender) => {
+async function handleMessage(req) {
   if (req.msg === GET_TABS_MSG) {
     const tabs = await listTabs();
     return {
@@ -9,33 +9,28 @@ browser.runtime.onMessage.addListener(async (req, sender) => {
       data: tabs,
     };
   }
-});
+}
 
-browser.browserAction.onClicked.addListener(async () => {
+async function handleClicked() {
   await openTabble();
-});
+}
 
-browser.commands.onCommand.addListener(async (command) => {
+async function handleCommand(command) {
   if (command === OPEN_CMD) {
     await openTabble();
   }
-});
+}
 
-const filter = {
-  urls: ['<all_urls>'],
-  properties: ['title', 'favIconUrl'],
-};
-
-browser.tabs.onCreated.addListener(async (tab) => {
+async function handleCreated(tab) {
   await browser.runtime.sendMessage({
     msg: 'create',
     data: {
       tab,
     },
   });
-});
+}
 
-browser.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
+async function handleRemoved(tabId, removeInfo) {
   const { windowId } = removeInfo;
   await browser.runtime.sendMessage({
     msg: 'remove',
@@ -44,52 +39,52 @@ browser.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
       windowId,
     },
   });
-});
+}
 
-browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+const filter = {
+  urls: ['<all_urls>'],
+  properties: ['title', 'favIconUrl'],
+};
+
+async function handleUpdated(tabId, changeInfo, tab) {
   await browser.runtime.sendMessage({
     msg: 'update',
     data: {
-      tabId,
       tab,
     },
   });
-}, filter);
+}
 
-browser.tabs.onMoved.addListener(async (tabId, moveInfo) => {
+async function handleMoved(tabId, moveInfo) {
   const { windowId, fromIndex, toIndex } = moveInfo;
   const tab = await browser.tabs.get(tabId);
   await browser.runtime.sendMessage({
     msg: 'move',
     data: {
       tab,
-      tabId,
       windowId,
       fromIndex,
       toIndex,
     },
   });
-});
+}
 
-browser.tabs.onAttached.addListener(async (tabId, attachInfo) => {
-  console.log('A tab has been attached!');
-  const { newWindowId, newPosition } = moveInfo;
+async function handleAttached(tabId, attachInfo) {
+  const { newWindowId, newPosition } = attachInfo;
   const tab = await browser.tabs.get(tabId);
   await browser.runtime.sendMessage({
     msg: 'attach',
     data: {
       tab,
-      tabId,
       newWindowId,
       newPosition,
     },
   });
-});
+}
 
-browser.tabs.onDetached.addListener(async (tabId, detachInfo) => {
-  console.log('A tab has been detached!');
+async function handleDetached(tabId, detachInfo) {
   const { oldWindowId, oldPosition } = detachInfo;
-  const tab = await brower.tabs.get(tabId);
+  const tab = await browser.tabs.get(tabId);
   await browser.runtime.sendMessage({
     msg: 'detach',
     data: {
@@ -98,4 +93,14 @@ browser.tabs.onDetached.addListener(async (tabId, detachInfo) => {
       oldPosition,
     },
   });
-});
+}
+
+browser.runtime.onMessage.addListener(handleMessage);
+browser.browserAction.onClicked.addListener(handleClicked);
+browser.commands.onCommand.addListener(handleCommand);
+browser.tabs.onCreated.addListener(handleCreated);
+browser.tabs.onRemoved.addListener(handleRemoved);
+browser.tabs.onUpdated.addListener(handleUpdated, filter);
+browser.tabs.onMoved.addListener(handleMoved);
+browser.tabs.onAttached.addListener(handleAttached);
+browser.tabs.onDetached.addListener(handleDetached);
