@@ -117,16 +117,12 @@ export default {
         }
         if (msg === 'detach') {
           const { tab, oldWindowId, oldPosition } = data;
-          const { id: tabId, windowId, index } = tab;
           const tabsInWindow = this.windowTabMapping[oldWindowId];
-          const tabIndexInArr = this.tabs.find((t) => t.id === tabId);
-          const tabIndexInMap = tabsInWindow.find((t) => t.id === tabId);
-          this.$set(this.tabs, tabIndexInArr, tab);
-          this.$delete(tabsInWindow, tabIndexInMap);
-          if (!(windowId in this.windowTabMapping)) {
-            this.$set(this.windowTabMapping, windowId, [tab]);
-          } else {
-            this.windowTabMapping[windowId].splice(index, 0, tab);
+          const tabIndexInArr = this.tabs.findIndex((t) => t.id === tab.id);
+          this.$delete(this.tabs, tabIndexInArr);
+          this.$delete(tabsInWindow, oldPosition);
+          if (tabsInWindow.length === 0) {
+            delete this.windowTabMapping[oldWindowId];
           }
         }
       });
