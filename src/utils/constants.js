@@ -12,8 +12,24 @@ const TAB_PROPERTIES = [
 const TABBLE_REL_URL = '../dist/index.html';
 const TABBLE_EXT_URL = browser.runtime.getURL(TABBLE_REL_URL);
 
-const GET_TABS_MSG = 'get_tabs';
-const SEND_TABS_MSG = 'send_tabs';
-const OPEN_CMD = 'open';
+const Url = {
+    TABBLE_REL_URL,
+    TABBLE_EXT_URL,
+};
 
-export { TAB_PROPERTIES, TABBLE_REL_URL, TABBLE_EXT_URL, GET_TABS_MSG, SEND_TABS_MSG, OPEN_CMD };
+const Message = {
+    GET_TABS: 'get_tabs',
+    SEND_TABS: 'send_tabs',
+    CREATE: 'create',
+    MOVE: 'move',
+    UPDATE: 'update',
+    REMOVE: 'remove',
+    ATTACH: 'attach',
+    DETACH: 'detach',
+};
+
+const Command = {
+    OPEN: 'open',
+};
+
+export { TAB_PROPERTIES, Url, Message, Command };

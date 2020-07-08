@@ -12,7 +12,7 @@
 </template>
 
 <script charset="utf-8">
-import { GET_TABS_MSG } from '../utils/constants.js';
+import { Message } from '../utils/constants.js';
 
 export default {
   name: 'TabList',
@@ -22,8 +22,7 @@ export default {
     try {
       await this.getTabList();
     } catch (err) {
-      console.error('Error getting tab list.');
-      throw new Error('Could not retrieve tab list.');
+      throw new Error(err);
     }
     this.setWindowTabMapping();
   },
@@ -37,13 +36,12 @@ export default {
   methods: {
     getTabList: async function () {
       try {
-        const res = await browser.runtime.sendMessage({
-          msg: GET_TABS_MSG,
-        });
+        const msg = Message.GET_TABS;
+        console.log(msg);
+        const res = await browser.runtime.sendMessage({ msg });
         this.tabs = res.data;
       } catch (err) {
-        console.error('Error sending GET_TABS_MSG.');
-        throw new Error('Could not send GET_TABS_MSG.');
+        throw new Error(err);
       }
     },
     setWindowTabMapping: function () {
@@ -61,15 +59,14 @@ export default {
         await browser.tabs.update(tabId, { active: true });
         await browser.windows.update(windowId, { focused: true });
       } catch (err) {
-        console.error('Error switching to tab or window.');
-        throw new Error('Could not switch to tab or window.');
+        throw new Error(err);
       }
     },
     initMsgHandler: function () {
-      browser.runtime.onMessage.addListener((req, sender) => {
+      browser.runtime.onMessage.addListener((req) => {
         console.log(req);
         const { msg, data } = req;
-        if (msg === 'create') {
+        if (msg === Message.CREATE) {
           const { tab } = data;
           const { windowId, index } = tab;
           this.tabs.splice(index, 0, tab);
@@ -79,7 +76,7 @@ export default {
             this.windowTabMapping[windowId].splice(index, 0, tab);
           }
         }
-        if (msg === 'remove') {
+        if (msg === Message.REMOVE) {
           const { tabId, windowId } = data;
           const tabsInWindow = this.windowTabMapping[windowId].filter((t) => t.id !== tabId);
           this.tabs = this.tabs.filter((t) => t.id !== tabId);
@@ -88,7 +85,7 @@ export default {
             delete this.windowTabMapping[windowId];
           }
         }
-        if (msg === 'update') {
+        if (msg === Message.UPDATE) {
           const { tab } = data;
           const tabsInWindow = this.windowTabMapping[tab.windowId];
           const tabIndexInArr = this.tabs.findIndex((t) => t.id === tab.id);
@@ -96,7 +93,7 @@ export default {
           this.$set(this.tabs, tabIndexInArr, tab);
           this.$set(this.windowTabMapping[tab.windowId], tabIndexInMap, tab);
         }
-        if (msg === 'move') {
+        if (msg === Message.MOVE) {
           const { tab, windowId, fromIndex, toIndex } = data;
           const tabsInWindow = this.windowTabMapping[windowId];
           const tabIndexInArr = this.tabs.findIndex((t) => t.id === tab.id);
@@ -105,7 +102,7 @@ export default {
           this.$delete(tabsInWindow, fromIndex);
           tabsInWindow.splice(toIndex, 0, tab);
         }
-        if (msg === 'attach') {
+        if (msg === Message.ATTACH) {
           const { tab, newWindowId, newPosition } = data;
           const tabIndexInArr = this.tabs.findIndex((t) => t.id === tab.id);
           this.$set(this.tabs, tabIndexInArr, tab);
@@ -115,7 +112,7 @@ export default {
             this.windowTabMapping[newWindowId].splice(newPosition, 0, tab);
           }
         }
-        if (msg === 'detach') {
+        if (msg === Message.DETACH) {
           const { tab, oldWindowId, oldPosition } = data;
           const tabsInWindow = this.windowTabMapping[oldWindowId];
           const tabIndexInArr = this.tabs.findIndex((t) => t.id === tab.id);

@@ -1,4 +1,4 @@
-import { TAB_PROPERTIES, TABBLE_REL_URL, TABBLE_EXT_URL } from './constants.js';
+import { TAB_PROPERTIES, Url } from './constants.js';
 
 function filterList(tabList) {
   const filteredList = [];
@@ -20,7 +20,7 @@ async function listTabs() {
 async function checkTabble() {
   const tabs = await listTabs();
   for (const t of tabs) {
-    if (t.url === TABBLE_EXT_URL) {
+    if (t.url === Url.TABBLE_EXT_URL) {
       return t;
     }
   }
@@ -32,7 +32,7 @@ async function openTabble() {
   if (tabble) {
     await browser.tabs.remove(tabble.id);
   }
-  await browser.tabs.create({ url: TABBLE_REL_URL });
+  await browser.tabs.create({ url: Url.TABBLE_REL_URL });
 }
 
 export { filterList, listTabs, openTabble, checkTabble };

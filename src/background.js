@@ -1,11 +1,11 @@
 import { listTabs, openTabble, checkTabble } from './utils/helper.js';
-import { GET_TABS_MSG, SEND_TABS_MSG, OPEN_CMD, TABBLE_EXT_URL } from './utils/constants.js';
+import { Messge, Command } from './utils/constants.js';
 
 async function handleMessage(req) {
-  if (req.msg === GET_TABS_MSG) {
+  if (req.msg === Message.GET_TABS) {
     const tabs = await listTabs();
     return {
-      msg: SEND_TABS_MSG,
+      msg: Message.SEND_TABS,
       data: tabs,
     };
   }
@@ -16,14 +16,14 @@ async function handleClicked() {
 }
 
 async function handleCommand(command) {
-  if (command === OPEN_CMD) {
+  if (command === Command.OPEN) {
     await openTabble();
   }
 }
 
 async function handleCreated(tab) {
   await browser.runtime.sendMessage({
-    msg: 'create',
+    msg: Message.CREATE,
     data: {
       tab,
     },
@@ -33,7 +33,7 @@ async function handleCreated(tab) {
 async function handleRemoved(tabId, removeInfo) {
   const { windowId } = removeInfo;
   await browser.runtime.sendMessage({
-    msg: 'remove',
+    msg: Message.REMOVE,
     data: {
       tabId,
       windowId,
@@ -48,7 +48,7 @@ const filter = {
 
 async function handleUpdated(tabId, changeInfo, tab) {
   await browser.runtime.sendMessage({
-    msg: 'update',
+    msg: Message.UPDATE,
     data: {
       tab,
     },
@@ -59,7 +59,7 @@ async function handleMoved(tabId, moveInfo) {
   const { windowId, fromIndex, toIndex } = moveInfo;
   const tab = await browser.tabs.get(tabId);
   await browser.runtime.sendMessage({
-    msg: 'move',
+    msg: Message.MOVE,
     data: {
       tab,
       windowId,
@@ -73,7 +73,7 @@ async function handleAttached(tabId, attachInfo) {
   const { newWindowId, newPosition } = attachInfo;
   const tab = await browser.tabs.get(tabId);
   await browser.runtime.sendMessage({
-    msg: 'attach',
+    msg: Message.ATTACH,
     data: {
       tab,
       newWindowId,
@@ -86,7 +86,7 @@ async function handleDetached(tabId, detachInfo) {
   const { oldWindowId, oldPosition } = detachInfo;
   const tab = await browser.tabs.get(tabId);
   await browser.runtime.sendMessage({
-    msg: 'detach',
+    msg: Message.DETACH,
     data: {
       tab,
       oldWindowId,
