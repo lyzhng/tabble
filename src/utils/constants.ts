@@ -1,4 +1,6 @@
-const TAB_PROPERTIES = [
+import { IUrl, IMessage, ICommand } from './types';
+
+const TAB_PROPERTIES: Array<string> = [
     'active',
     'favIconUrl',
     'index',
@@ -9,15 +11,15 @@ const TAB_PROPERTIES = [
     'id',
 ];
 
-const TABBLE_REL_URL = '../dist/index.html';
-const TABBLE_EXT_URL = browser.runtime.getURL(TABBLE_REL_URL);
+const TABBLE_REL_URL: string = '../dist/index.html';
+const TABBLE_EXT_URL: string = browser.runtime.getURL(TABBLE_REL_URL);
 
-const Url = {
+const Url: IUrl = {
     TABBLE_REL_URL,
     TABBLE_EXT_URL,
 };
 
-const Message = {
+const Message: IMessage = {
     GET_TABS: 'get_tabs',
     SEND_TABS: 'send_tabs',
     CREATE: 'create',
@@ -28,7 +30,7 @@ const Message = {
     DETACH: 'detach',
 };
 
-const Command = {
+const Command: ICommand = {
     OPEN: 'open',
 };
 

@@ -1,9 +1,10 @@
-import { TAB_PROPERTIES, Url } from './constants.js';
+import { TAB_PROPERTIES, Url } from './constants';
+import { ITab } from './types';
 
-function filterList(tabList) {
-  const filteredList = [];
+function filterList(tabList: Array<ITab>): Array<ITab> {
+  const filteredList: Array<ITab> = [];
   for (const tab of tabList) {
-    const filteredTab = {};
+    const filteredTab: ITab = {} as ITab;
     for (const prop of TAB_PROPERTIES) {
       filteredTab[prop] = tab[prop];
     }
@@ -12,13 +13,13 @@ function filterList(tabList) {
   return filteredList;
 }
 
-async function listTabs() {
-  const tabList = await browser.tabs.query({});
+async function listTabs(): Promise<Array<ITab>> {
+  const tabList: Array<ITab> = await browser.tabs.query({});
   return filterList(tabList);
 }
 
-async function checkTabble() {
-  const tabs = await listTabs();
+async function checkTabble(): Promise<ITab | null> {
+  const tabs: Array<ITab> = await listTabs();
   for (const t of tabs) {
     if (t.url === Url.TABBLE_EXT_URL) {
       return t;
@@ -27,7 +28,7 @@ async function checkTabble() {
   return null;
 }
 
-async function openTabble() {
+async function openTabble(): Promise<void> {
   const tabble = await checkTabble();
   if (tabble) {
     await browser.tabs.remove(tabble.id);

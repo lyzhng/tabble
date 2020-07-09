@@ -9,23 +9,37 @@ interface ITab {
 }
 
 interface IWindowToTab {
-    [windowId: number]: Array<Tab>;
+    [windowId: number]: Array<ITab>;
 }
 
 interface IRequest {
     msg: string;
-    data: {
-        tab: ITab;
-        tabs: ITab[];
-        tabId: number;
-        windowId: number;
-        fromIndex: number;
-        toIndex: number;
-        newWindowId: number;
-        newPosition: number;
-        oldWindowId: number;
-        oldPosition: number;
-    }
+    data: IData;
 }
 
-export { ITab, IWindowToTab, IRequest };
+interface IData {
+    tab: ITab;
+    tabs: Array<ITab>;
+    tabId: number;
+    windowId: number;
+    fromIndex: number;
+    toIndex: number;
+    newWindowId: number;
+    newPosition: number;
+    oldWindowId: number;
+    oldPosition: number;
+}
+
+interface IUrl {
+    [url: string]: string;
+}
+
+interface IMessage {
+    [msg: string]: string;
+}
+
+interface ICommand {
+    [cmd: string]: string;
+}
+
+export { ITab, IData, IWindowToTab, IRequest, IUrl, IMessage, ICommand };

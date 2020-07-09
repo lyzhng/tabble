@@ -1,27 +1,30 @@
-import { listTabs, openTabble, checkTabble } from './utils/helper.js';
-import { Message, Command } from './utils/constants.js';
+import { listTabs, openTabble } from './utils/helper';
+import { Message, Command } from './utils/constants';
+import { ITab, IRequest } from './utils/types';
 
-async function handleMessage(req) {
+async function handleMessage(req: IRequest): Promise<IRequest> {
   if (req.msg === Message.GET_TABS) {
-    const tabs = await listTabs();
+    const tabs: Array<ITab> = await listTabs();
     return {
       msg: Message.SEND_TABS,
-      data: tabs,
+      data: {
+        tabs
+      },
     };
   }
 }
 
-async function handleClicked() {
+async function handleClicked(): Promise<void> {
   await openTabble();
 }
 
-async function handleCommand(command) {
+async function handleCommand(command: string): Promise<void> {
   if (command === Command.OPEN) {
     await openTabble();
   }
 }
 
-async function handleCreated(tab) {
+async function handleCreated(tab: ITab): Promise<void> {
   await browser.runtime.sendMessage({
     msg: Message.CREATE,
     data: {
@@ -30,7 +33,7 @@ async function handleCreated(tab) {
   });
 }
 
-async function handleRemoved(tabId, removeInfo) {
+async function handleRemoved(tabId: number, removeInfo: { windowId: number }): Promise<void> {
   const { windowId } = removeInfo;
   await browser.runtime.sendMessage({
     msg: Message.REMOVE,
@@ -41,12 +44,15 @@ async function handleRemoved(tabId, removeInfo) {
   });
 }
 
-const filter = {
+const filter: {
+  urls: Array<string>,
+  properties: Array<string>,
+} = {
   urls: ['<all_urls>'],
   properties: ['title', 'favIconUrl'],
 };
 
-async function handleUpdated(tabId, changeInfo, tab) {
+async function handleUpdated(tabId, changeInfo, tab: ITab): Promise<void> {
   await browser.runtime.sendMessage({
     msg: Message.UPDATE,
     data: {
@@ -55,7 +61,7 @@ async function handleUpdated(tabId, changeInfo, tab) {
   });
 }
 
-async function handleMoved(tabId, moveInfo) {
+async function handleMoved(tabId: number, moveInfo: { windowId: number, fromIndex: number, toIndex: number }): Promise<void> {
   const { windowId, fromIndex, toIndex } = moveInfo;
   const tab = await browser.tabs.get(tabId);
   await browser.runtime.sendMessage({
@@ -69,7 +75,7 @@ async function handleMoved(tabId, moveInfo) {
   });
 }
 
-async function handleAttached(tabId, attachInfo) {
+async function handleAttached(tabId: number, attachInfo: { newWindowId: number, newPosition: number }): Promise<void> {
   const { newWindowId, newPosition } = attachInfo;
   const tab = await browser.tabs.get(tabId);
   await browser.runtime.sendMessage({
@@ -82,7 +88,7 @@ async function handleAttached(tabId, attachInfo) {
   });
 }
 
-async function handleDetached(tabId, detachInfo) {
+async function handleDetached(tabId: number, detachInfo: { oldWindowId: number, oldPosition: number }): Promise<void> {
   const { oldWindowId, oldPosition } = detachInfo;
   const tab = await browser.tabs.get(tabId);
   await browser.runtime.sendMessage({
