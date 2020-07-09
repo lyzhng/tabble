@@ -1,9 +1,9 @@
 <template>
   <div>
     <h1>{{ greeting }}</h1>
-    <div v-for="(tabList, windowId) in windowTabMapping">
+    <div v-for="(tabList, windowId) in windowTabMapping" :key="windowId">
       <h2>{{ windowId }}</h2>
-      <div v-for="t in tabList">
+      <div v-for="t in tabList" :key="t.id">
         <img v-bind:src="t.favIconUrl" alt="favicon" width="16px" height="16px" />
         <a :href="t.url" @click.prevent="switchTabAndWindow(t.windowId, t.id)">{{ t.title }}</a>
       </div>
@@ -11,62 +11,67 @@
   </div>
 </template>
 
-<script charset="utf-8">
+<script charset="utf-8" lang="ts">
+import { Component, Vue } from 'vue-property-decorator';
 import { Message } from '../utils/constants.js';
+import { ITab, IWindowToTab, IRequest } from '../utils/types';
 
-export default {
-  name: 'TabList',
-  mounted: async function () {
+const b: number = 3;
+b = 'hi';
+
+@Component
+export default class TabList extends Vue {
+  public greeting: string = 'Tabble';
+  public tabs: ITab[] = [];
+  public windowTabMapping: IWindowToTab = {};
+
+  async mounted() {
     console.log('TabList.vue mounted!');
-    this.initMsgHandler();
     try {
       await this.getTabList();
     } catch (err) {
       throw new Error(err);
     }
-    this.setWindowTabMapping();
-  },
-  data: function () {
-    return {
-      greeting: 'Tabble',
-      tabs: [],
-      windowTabMapping: {},
-    };
-  },
-  methods: {
-    getTabList: async function () {
-      try {
-        const res = await browser.runtime.sendMessage({ msg: Message.GET_TABS });
-        this.tabs = res.data;
-      } catch (err) {
-        throw new Error(err);
+    this.initWindowTabMapping();
+    this.initMsgHandler();
+  }
+
+  public async getTabList(): Promise<void> {
+    try {
+      const res: IRequest = await browser.runtime.sendMessage({ msg: Message.GET_TABS });
+      this.tabs = res.data;
+    } catch (err) {
+      throw new Error(err);
+    }
+  }
+
+  public initWindowTabMapping(): void {
+    this.tabs.forEach((t: ITab) => {
+      if (!(t.windowId! in this.windowTabMapping)) {
+        this.$set(this.windowTabMapping, t.windowId, [t]);
+      } else {
+        const tabsInWindow: ITab[] = this.windowTabMapping[t.windowId];
+        tabsInWindow.push(t);
       }
-    },
-    setWindowTabMapping: function () {
-      this.tabs.forEach((t) => {
-        if (!(t.windowId in this.windowTabMapping)) {
-          this.$set(this.windowTabMapping, t.windowId, [t]);
-        } else {
-          const tabsInWindow = this.windowTabMapping[t.windowId];
-          tabsInWindow.push(t);
-        }
-      });
-    },
-    switchTabAndWindow: async function (windowId, tabId) {
-      try {
-        await browser.tabs.update(tabId, { active: true });
-        await browser.windows.update(windowId, { focused: true });
-      } catch (err) {
-        throw new Error(err);
-      }
-    },
-    initMsgHandler: function () {
-      browser.runtime.onMessage.addListener((req) => {
+    });
+  }
+
+  public async switchTabAndWindow(windowId: number, tabId: number): Promise<void> {
+    try {
+      await browser.tabs.update(tabId, { active: true });
+      await browser.windows.update(windowId, { focused: true });
+    } catch (err) {
+      throw new Error(err);
+    }
+  }
+
+  public initMsgHandler(): void {
+      browser.runtime.onMessage.addListener((req: IRequest) => {
         console.log(req);
-        const { msg, data } = req;
+        const { msg, data }: IRequest = req;
         if (msg === Message.CREATE) {
           const { tab } = data;
-          const { windowId, index } = tab;
+          const { windowId, index }: ITab = tab;
           this.tabs.splice(index, 0, tab);
           if (!(windowId in this.windowTabMapping)) {
             this.$set(this.windowTabMapping, windowId, [tab]);
@@ -101,7 +106,7 @@ export default {
           tabsInWindow.splice(toIndex, 0, tab);
         }
         if (msg === Message.ATTACH) {
-          const { tab, newWindowId, newPosition } = data;
+          const { tab, newWindowId, newPosition }:  = data;
           const tabIndexInArr = this.tabs.findIndex((t) => t.id === tab.id);
           this.$set(this.tabs, tabIndexInArr, tab);
           if (!(newWindowId in this.windowTabMapping)) {
