@@ -36,9 +36,7 @@ export default {
   methods: {
     getTabList: async function () {
       try {
-        const msg = Message.GET_TABS;
-        console.log(msg);
-        const res = await browser.runtime.sendMessage({ msg });
+        const res = await browser.runtime.sendMessage({ msg: Message.GET_TABS });
         this.tabs = res.data;
       } catch (err) {
         throw new Error(err);

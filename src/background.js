@@ -1,5 +1,5 @@
 import { listTabs, openTabble, checkTabble } from './utils/helper.js';
-import { Messge, Command } from './utils/constants.js';
+import { Message, Command } from './utils/constants.js';
 
 async function handleMessage(req) {
   if (req.msg === Message.GET_TABS) {
