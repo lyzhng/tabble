@@ -194,14 +194,49 @@ export default class TabList extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
+// @import url('../static/css/normalize');
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap');
-@debug 'Imported Roboto Mono';
+
 $font-primary: 'Roboto Mono', monospace;
-.tab-list {
-  font-family: $font-primary;
+$light-color: #eee;
+$dark-color: #333;
+
+@mixin reset-spacing {
   padding: 0;
   margin: 0;
+}
+
+@mixin light-scheme {
+  background: $light-color;
+  color: $dark-color;
+}
+
+@mixin dark-scheme {
+  background: $dark-color;
+  color: $light-color;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body,
+h1,
+h2 {
+  @include reset-spacing;
+}
+
+body {
+  font-family: 'Roboto Mono', monospace;
+}
+
+.tab-list {
+  width: 70vw;
+  margin: 0 auto;
+  padding: 1rem;
 }
 
 a {
@@ -219,9 +254,38 @@ a {
 
 .close-icon {
   margin: 0 0.5rem;
+  color: orangered;
   &:hover,
   &:focus {
     cursor: crosshair;
+  }
+}
+
+ul {
+  padding: 0 auto;
+  margin: 0 auto;
+  & li {
+    list-style-type: none;
+  }
+}
+
+@media (prefers-color-scheme: light), (prefers-color-scheme: no-preference) {
+  a {
+    color: #333;
+  }
+  background {
+    background: #eee;
+    color: #333;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  a {
+    color: #eee;
+  }
+  body {
+    background: #333;
+    color: #eee;
   }
 }
 </style>
