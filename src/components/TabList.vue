@@ -52,6 +52,7 @@ export default class TabList extends Vue {
   async mounted() {
     console.log('TabList.vue mounted!');
     this.setColorScheme();
+    this.initColorSchemeHandler();
     try {
       await this.getTabList();
     } catch (err) {
@@ -59,6 +60,14 @@ export default class TabList extends Vue {
     }
     this.initWindowTabMapping();
     this.initMsgHandler();
+  }
+
+  public initColorSchemeHandler(): void {
+    const mql = window.matchMedia('(prefers-color-scheme: light)');
+    mql.addEventListener('change', (e) => {
+      this.lightColorScheme = e.matches;
+      this.setColorScheme();
+    });
   }
 
   public async getTabList(): Promise<void> {
@@ -209,7 +218,7 @@ export default class TabList extends Vue {
 
   public setColorScheme(): void {
     if (this.lightColorScheme) {
-      document.body.style.background = '#eee';
+      document.body.style.background = '#fff';
     } else {
       document.body.style.background = '#333';
     }
