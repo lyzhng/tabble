@@ -1,6 +1,14 @@
 <template>
-  <div class="tab-list">
-    <h1>{{ greeting }}</h1>
+  <div class="tab-list" :class="lightColorScheme ? '.light-scheme' : 'dark-scheme'">
+    <h1>
+      {{ greeting }}
+      <img
+        @click.prevent.stop="toggleColorScheme"
+        :src="lightColorScheme ? 'https://api.iconify.design/uil-sun.svg?color=black' : 'https://api.iconify.design/ion-moon.svg?color=white'"
+        width="32"
+        height="32"
+      />
+    </h1>
     <pre v-if="error">{{ error }}</pre>
     <div class="list">
       <ul v-for="(tabList, windowId, idx) in windowTabMapping" :key="windowId">
@@ -38,10 +46,12 @@ export default class TabList extends Vue {
   public readonly greeting: string = 'tabby, your tab manager';
   public tabs: Array<ITab> = [];
   public readonly windowTabMapping: IWindowToTab = {};
+  public lightColorScheme: boolean = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
   public error: string = '';
 
   async mounted() {
     console.log('TabList.vue mounted!');
+    this.setColorScheme();
     try {
       await this.getTabList();
     } catch (err) {
@@ -191,6 +201,19 @@ export default class TabList extends Vue {
       }
     });
   }
+
+  public toggleColorScheme(): void {
+    this.lightColorScheme = !this.lightColorScheme;
+    this.setColorScheme();
+  }
+
+  public setColorScheme(): void {
+    if (this.lightColorScheme) {
+      document.body.style.background = '#eee';
+    } else {
+      document.body.style.background = '#333';
+    }
+  }
 }
 </script>
 
@@ -198,7 +221,7 @@ export default class TabList extends Vue {
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap');
 
 $font-primary: 'Roboto Mono', monospace;
-$light-color: #eee;
+$light-color: #fff;
 $dark-color: #333;
 
 @mixin reset-spacing {
@@ -206,14 +229,22 @@ $dark-color: #333;
   margin: 0;
 }
 
-@mixin light-scheme {
+.light-scheme {
   background: $light-color;
   color: $dark-color;
+
+  a {
+    color: $dark-color;
+  }
 }
 
-@mixin dark-scheme {
+.dark-scheme {
   background: $dark-color;
   color: $light-color;
+
+  a {
+    color: $light-color;
+  }
 }
 
 *,
@@ -230,6 +261,10 @@ h2 {
 
 body {
   font-family: 'Roboto Mono', monospace;
+}
+
+img {
+  vertical-align: middle;
 }
 
 .tab-list {
@@ -265,26 +300,6 @@ ul {
   margin: 0 auto;
   & li {
     list-style-type: none;
-  }
-}
-
-@media (prefers-color-scheme: light), (prefers-color-scheme: no-preference) {
-  a {
-    color: #333;
-  }
-  background {
-    background: #eee;
-    color: #333;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  a {
-    color: #eee;
-  }
-  body {
-    background: #333;
-    color: #eee;
   }
 }
 </style>
