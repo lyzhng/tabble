@@ -4,18 +4,22 @@
     <pre v-if="error">{{ error }}</pre>
     <div class="list">
       <ul v-for="(tabList, windowId, idx) in windowTabMapping" :key="windowId">
-        <h2>{{ idx + 1 }}</h2>
-        <ul v-for="t in tabList" :key="t.id">
-          <img
-            class="close-icon"
-            src="https://api.iconify.design/fa-close.svg"
-            width="16px"
-            height="16px"
-            @click.stop.prevent="closeTab(t.id)"
-          />
-          <img :src="t.favIconUrl" alt="Favicon" width="16px" height="16px" />
-          <a :href="t.url" @click.stop.prevent="switchTabAndWindow(t.windowId, t.id)">{{ t.title }}</a>
-        </ul>
+        <li>
+          <h2>
+            <span class="close-icon" @click.stop.prevent="closeWindow(+windowId)">[X]</span>
+            {{ idx + 1 }} ({{ tabList.length}} tabs)
+          </h2>
+          <ul v-for="t in tabList" :key="t.id">
+            <li>
+              <span class="close-icon" @click.stop.prevent="closeTab(+t.id)">[X]</span>
+              <img class="favicon" :src="t.favIconUrl" alt="?" width="16" height="16" />
+              <a
+                :href="t.url"
+                @click.stop.prevent="switchTabAndWindow(+t.windowId, +t.id)"
+              >{{ t.title }}</a>
+            </li>
+          </ul>
+        </li>
       </ul>
     </div>
   </div>
@@ -35,6 +39,7 @@ export default class TabList extends Vue {
   public tabs: Array<ITab> = [];
   public readonly windowTabMapping: IWindowToTab = {};
   public error: string = '';
+
   async mounted() {
     console.log('TabList.vue mounted!');
     try {
@@ -85,6 +90,15 @@ export default class TabList extends Vue {
       await browser.tabs.remove(tabId);
     } catch (err) {
       this.error = 'Tab could not be closed.';
+      throw new Error(err);
+    }
+  }
+
+  public async closeWindow(windowId: number): Promise<void> {
+    try {
+      await browser.windows.remove(windowId);
+    } catch (err) {
+      this.error = 'Window could not be closed.';
       throw new Error(err);
     }
   }
