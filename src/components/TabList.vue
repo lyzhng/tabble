@@ -195,7 +195,6 @@ export default class TabList extends Vue {
 </script>
 
 <style lang="scss">
-// @import url('../static/css/normalize');
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap');
 
 $font-primary: 'Roboto Mono', monospace;
