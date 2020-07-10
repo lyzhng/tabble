@@ -44,10 +44,7 @@ async function handleRemoved(tabId: number, removeInfo: { windowId: number }): P
   });
 }
 
-const filter: {
-  urls: Array<string>,
-  properties: Array<string>,
-} = {
+const filter = {
   urls: ['<all_urls>'],
   properties: ['title', 'favIconUrl'],
 };
