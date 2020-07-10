@@ -1,9 +1,11 @@
 <template>
   <div>
     <h1>{{ greeting }}</h1>
+    <pre v-if="error">{{ error }}</pre>
     <div v-for="(tabList, windowId) in windowTabMapping" :key="windowId">
       <h2>{{ windowId }}</h2>
       <div v-for="t in tabList" :key="t.id">
+        <button @click.prevent="closeTab(t.id)">X</button>
         <img v-bind:src="t.favIconUrl" alt="favicon" width="16px" height="16px" />
         <a :href="t.url" @click.prevent="switchTabAndWindow(t.windowId, t.id)">{{ t.title }}</a>
       </div>
@@ -12,17 +14,18 @@
 </template>
 
 <script charset="utf-8" lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import { Message } from "../utils/constants";
-import { ITab, IWindowToTab, IRequest, IData } from "../utils/types";
+import { Component, Vue } from 'vue-property-decorator';
+import { Message } from '../utils/constants';
+import { ITab, IWindowToTab, IRequest, IData } from '../utils/types';
 
 @Component
 export default class TabList extends Vue {
-  public readonly greeting: string = "Tabble";
+  public readonly greeting: string = 'Tabble';
   public tabs: Array<ITab> = [];
   public readonly windowTabMapping: IWindowToTab = {};
+  public error: string = '';
   async mounted() {
-    console.log("TabList.vue mounted!");
+    console.log('TabList.vue mounted!');
     try {
       await this.getTabList();
     } catch (err) {
@@ -40,6 +43,7 @@ export default class TabList extends Vue {
       const data: IData = res.data;
       this.tabs = res.data.tabs;
     } catch (err) {
+      this.error = 'Could not fetch tabs.';
       throw new Error(err);
     }
   }
@@ -55,15 +59,84 @@ export default class TabList extends Vue {
     });
   }
 
-  public async switchTabAndWindow(
-    windowId: number,
-    tabId: number
-  ): Promise<void> {
+  public async switchTabAndWindow(windowId: number, tabId: number): Promise<void> {
     try {
       await browser.tabs.update(tabId, { active: true });
       await browser.windows.update(windowId, { focused: true });
     } catch (err) {
+      this.error = 'Could not switch to selected tab.';
       throw new Error(err);
+    }
+  }
+
+  public async closeTab(tabId: number): Promise<void> {
+    try {
+      await browser.tabs.remove(tabId);
+    } catch (err) {
+      this.error = 'Tab could not be closed.';
+      throw new Error(err);
+    }
+  }
+
+  public handleCreated(data: IData): void {
+    const { tab }: IData = data;
+    const { windowId, index }: ITab = tab;
+    this.tabs.splice(index, 0, tab);
+    if (!(windowId in this.windowTabMapping)) {
+      this.$set(this.windowTabMapping, windowId, [tab]);
+    } else {
+      this.windowTabMapping[windowId].splice(index, 0, tab);
+    }
+  }
+
+  public handleRemoved(data: IData): void {
+    const { tabId, windowId }: IData = data;
+    const tabsInWindow: Array<ITab> = this.windowTabMapping[windowId].filter((t) => t.id !== tabId);
+    this.tabs = this.tabs.filter((t) => t.id !== tabId);
+    this.$set(this.windowTabMapping, windowId, tabsInWindow);
+    if (this.windowTabMapping[windowId].length === 0) {
+      delete this.windowTabMapping[windowId];
+    }
+  }
+
+  public handleUpdated(data: IData): void {
+    const { tab }: IData = data;
+    const tabsInWindow: Array<ITab> = this.windowTabMapping[tab.windowId];
+    const tabIndexInArr: number = this.tabs.findIndex((t) => t.id === tab.id);
+    const tabIndexInMap: number = tabsInWindow.findIndex((t) => t.id === tab.id);
+    this.$set(this.tabs, tabIndexInArr, tab);
+    this.$set(this.windowTabMapping[tab.windowId], tabIndexInMap, tab);
+  }
+
+  public handleMoved(data: IData): void {
+    const { tab, windowId, fromIndex, toIndex }: IData = data;
+    const tabsInWindow: Array<ITab> = this.windowTabMapping[windowId];
+    const tabIndexInArr: number = this.tabs.findIndex((t) => t.id === tab.id);
+    this.$delete(this.tabs, tabIndexInArr);
+    this.tabs.splice(toIndex, 0, tab);
+    this.$delete(tabsInWindow, fromIndex);
+    tabsInWindow.splice(toIndex, 0, tab);
+  }
+
+  public handleAttached(data: IData): void {
+    const { tab, newWindowId, newPosition }: IData = data;
+    const tabIndexInArr: number = this.tabs.findIndex((t) => t.id === tab.id);
+    this.$set(this.tabs, tabIndexInArr, tab);
+    if (!(newWindowId in this.windowTabMapping)) {
+      this.$set(this.windowTabMapping, newWindowId, [tab]);
+    } else {
+      this.windowTabMapping[newWindowId].splice(newPosition, 0, tab);
+    }
+  }
+
+  public handleDetached(data: IData): void {
+    const { tab, oldWindowId, oldPosition }: IData = data;
+    const tabsInWindow: Array<ITab> = this.windowTabMapping[oldWindowId];
+    const tabIndexInArr: number = this.tabs.findIndex((t) => t.id === tab.id);
+    this.$delete(this.tabs, tabIndexInArr);
+    this.$delete(tabsInWindow, oldPosition);
+    if (tabsInWindow.length === 0) {
+      delete this.windowTabMapping[oldWindowId];
     }
   }
 
@@ -71,73 +144,25 @@ export default class TabList extends Vue {
     browser.runtime.onMessage.addListener((req: IRequest) => {
       console.log(req);
       const { msg, data }: IRequest = req;
-      if (msg === Message.CREATE) {
-        const { tab }: IData = data;
-        const { windowId, index }: ITab = tab;
-        this.tabs.splice(index, 0, tab);
-        if (!(windowId in this.windowTabMapping)) {
-          this.$set(this.windowTabMapping, windowId, [tab]);
-        } else {
-          this.windowTabMapping[windowId].splice(index, 0, tab);
-        }
-      }
-      if (msg === Message.REMOVE) {
-        const { tabId, windowId }: IData = data;
-        const tabsInWindow: Array<ITab> = this.windowTabMapping[
-          windowId
-        ].filter((t) => t.id !== tabId);
-        this.tabs = this.tabs.filter((t) => t.id !== tabId);
-        this.$set(this.windowTabMapping, windowId, tabsInWindow);
-        if (this.windowTabMapping[windowId].length === 0) {
-          delete this.windowTabMapping[windowId];
-        }
-      }
-      if (msg === Message.UPDATE) {
-        const { tab }: IData = data;
-        const tabsInWindow: Array<ITab> = this.windowTabMapping[tab.windowId];
-        const tabIndexInArr: number = this.tabs.findIndex(
-          (t) => t.id === tab.id
-        );
-        const tabIndexInMap: number = tabsInWindow.findIndex(
-          (t) => t.id === tab.id
-        );
-        this.$set(this.tabs, tabIndexInArr, tab);
-        this.$set(this.windowTabMapping[tab.windowId], tabIndexInMap, tab);
-      }
-      if (msg === Message.MOVE) {
-        const { tab, windowId, fromIndex, toIndex }: IData = data;
-        const tabsInWindow: Array<ITab> = this.windowTabMapping[windowId];
-        const tabIndexInArr: number = this.tabs.findIndex(
-          (t) => t.id === tab.id
-        );
-        this.$delete(this.tabs, tabIndexInArr);
-        this.tabs.splice(toIndex, 0, tab);
-        this.$delete(tabsInWindow, fromIndex);
-        tabsInWindow.splice(toIndex, 0, tab);
-      }
-      if (msg === Message.ATTACH) {
-        const { tab, newWindowId, newPosition }: IData = data;
-        const tabIndexInArr: number = this.tabs.findIndex(
-          (t) => t.id === tab.id
-        );
-        this.$set(this.tabs, tabIndexInArr, tab);
-        if (!(newWindowId in this.windowTabMapping)) {
-          this.$set(this.windowTabMapping, newWindowId, [tab]);
-        } else {
-          this.windowTabMapping[newWindowId].splice(newPosition, 0, tab);
-        }
-      }
-      if (msg === Message.DETACH) {
-        const { tab, oldWindowId, oldPosition }: IData = data;
-        const tabsInWindow: Array<ITab> = this.windowTabMapping[oldWindowId];
-        const tabIndexInArr: number = this.tabs.findIndex(
-          (t) => t.id === tab.id
-        );
-        this.$delete(this.tabs, tabIndexInArr);
-        this.$delete(tabsInWindow, oldPosition);
-        if (tabsInWindow.length === 0) {
-          delete this.windowTabMapping[oldWindowId];
-        }
+      switch (msg) {
+        case Message.CREATE:
+          this.handleCreated(data);
+          break;
+        case Message.REMOVE:
+          this.handleRemoved(data);
+          break;
+        case Message.UPDATE:
+          this.handleUpdated(data);
+          break;
+        case Message.MOVE:
+          this.handleMoved(data);
+          break;
+        case Message.ATTACH:
+          this.handleAttached(data);
+          break;
+        case Message.DETACH:
+          this.handleDetached(data);
+          break;
       }
     });
   }
