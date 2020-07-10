@@ -7,6 +7,7 @@ Tabble is a Firefox extension that displays all your tabs in a single tab, other
 - [Vue](https://vuejs.org/v2/guide/)
 - [Parcel](https://parceljs.org/)
 - [Babel](https://babeljs.io/)
+- [SCSS](https://sass-lang.com)
 - [Firefox's WebExtensions API](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API)
 
 ## :package:  Installation
