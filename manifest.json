@@ -1,18 +1,18 @@
 {
   "manifest_version": 2,
-  "name": "Borderify",
+  "name": "tabby",
   "version": "1.0",
-  "description": "Adds a red border to all webpages matching mozilla.org.",
-  "permissions": ["<all_urls>", "tabs"],
+  "description": "View your tabs and windows from one place.",
+  "permissions": [
+    "<all_urls>",
+    "tabs"
+  ],
   "background": {
-    "scripts": ["dist/background.js"]
+    "scripts": [
+      "dist/background.js"
+    ]
   },
   "browser_action": {},
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "borderify@example.com"
-    }
-  },
   "commands": {
     "open": {
       "suggested_key": {
