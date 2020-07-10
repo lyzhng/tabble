@@ -1,26 +1,37 @@
 <template>
-  <div>
+  <div class="tab-list">
     <h1>{{ greeting }}</h1>
     <pre v-if="error">{{ error }}</pre>
-    <div v-for="(tabList, windowId) in windowTabMapping" :key="windowId">
-      <h2>{{ windowId }}</h2>
-      <div v-for="t in tabList" :key="t.id">
-        <button @click.prevent="closeTab(t.id)">X</button>
-        <img v-bind:src="t.favIconUrl" alt="favicon" width="16px" height="16px" />
-        <a :href="t.url" @click.prevent="switchTabAndWindow(t.windowId, t.id)">{{ t.title }}</a>
-      </div>
+    <div class="list">
+      <ul v-for="(tabList, windowId, idx) in windowTabMapping" :key="windowId">
+        <h2>{{ idx + 1 }}</h2>
+        <ul v-for="t in tabList" :key="t.id">
+          <img
+            class="close-icon"
+            src="https://api.iconify.design/fa-close.svg"
+            width="16px"
+            height="16px"
+            @click.stop.prevent="closeTab(t.id)"
+          />
+          <img :src="t.favIconUrl" alt="Favicon" width="16px" height="16px" />
+          <a :href="t.url" @click.stop.prevent="switchTabAndWindow(t.windowId, t.id)">{{ t.title }}</a>
+        </ul>
+      </ul>
     </div>
   </div>
 </template>
 
 <script charset="utf-8" lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+import { Fragment } from 'vue-fragment';
 import { Message } from '../utils/constants';
 import { ITab, IWindowToTab, IRequest, IData } from '../utils/types';
 
-@Component
+@Component({
+  components: { Fragment },
+})
 export default class TabList extends Vue {
-  public readonly greeting: string = 'Tabble';
+  public readonly greeting: string = 'tabby, your tab manager';
   public tabs: Array<ITab> = [];
   public readonly windowTabMapping: IWindowToTab = {};
   public error: string = '';
@@ -168,3 +179,35 @@ export default class TabList extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap');
+@debug 'Imported Roboto Mono';
+$font-primary: 'Roboto Mono', monospace;
+.tab-list {
+  font-family: $font-primary;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+  &:hover,
+  &:focus {
+    text-decoration: underline;
+  }
+}
+
+.list {
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+.close-icon {
+  margin: 0 0.5rem;
+  &:hover,
+  &:focus {
+    cursor: crosshair;
+  }
+}
+</style>
