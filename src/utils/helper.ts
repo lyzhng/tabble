@@ -18,21 +18,21 @@ async function listTabs(): Promise<Array<ITab>> {
   return filterList(tabList);
 }
 
-async function checkTabble(): Promise<ITab | null> {
+async function checkTabble(): Promise<Array<ITab>> {
   const tabs: Array<ITab> = await listTabs();
+  const tabble: Array<ITab> = [];
   for (const t of tabs) {
     if (t.url === Url.TABBLE_EXT_URL) {
-      return t;
+      tabble.push(t);
     }
   }
-  return null;
+  return tabble;
 }
 
 async function openTabble(): Promise<void> {
   const tabble = await checkTabble();
-  if (tabble) {
-    await browser.tabs.remove(tabble.id);
-  }
+  const ids: Array<number> = tabble.map((t) => t.id);
+  await browser.tabs.remove(ids);
   await browser.tabs.create({ url: Url.TABBLE_REL_URL });
 }
 
