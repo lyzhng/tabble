@@ -3,6 +3,9 @@
 ## :pencil:  Overview
 Tabble is a Firefox extension that displays all your tabs in a single tab, otherwise known as your Table of Contents Tab. From there, you can navigate to any of your tabs in different windows.
 
+## :eyes:  Demo
+Not available at the moment.
+
 ## :zap:  Technologies and Resources
 - [Vue](https://vuejs.org/v2/guide/)
 - [Parcel](https://parceljs.org/)
