@@ -58,8 +58,30 @@ export default class TabList extends Vue {
     } catch (err) {
       throw new Error(err);
     }
+    this.initKeyHandler();
     this.initWindowTabMapping();
     this.initMsgHandler();
+  }
+
+  public initKeyHandler(): void {
+    document.addEventListener('keydown', (event) => {
+      const height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+      const scrollAmt = height * 0.10;
+      if (event.keyCode === 74) {
+        console.log('J has been pressed.');
+        window.scrollBy({
+          top: scrollAmt,
+          behavior: 'smooth',
+        });
+      }
+      if (event.keyCode === 75) {
+        console.log('K has been pressed.');
+        window.scrollBy({
+          top: -scrollAmt,
+          behavior: 'smooth',
+        });
+      }
+    });
   }
 
   public initColorSchemeHandler(): void {
