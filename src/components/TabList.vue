@@ -64,22 +64,28 @@ export default class TabList extends Vue {
   }
 
   public initKeyHandler(): void {
-    document.addEventListener('keydown', (event) => {
+    document.addEventListener('keydown', ({ key }) => {
       const height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-      const scrollAmt = height * 0.10;
-      if (event.keyCode === 74) {
-        console.log('J has been pressed.');
-        window.scrollBy({
-          top: scrollAmt,
-          behavior: 'smooth',
-        });
-      }
-      if (event.keyCode === 75) {
-        console.log('K has been pressed.');
-        window.scrollBy({
-          top: -scrollAmt,
-          behavior: 'smooth',
-        });
+      const scrollAmt = height * 0.15;
+      switch (key) {
+        case 'j':
+          window.scrollBy({
+            top: scrollAmt,
+            behavior: 'smooth',
+          });
+          break;
+        case 'k':
+          window.scrollBy({
+            top: -scrollAmt,
+            behavior: 'smooth',
+          });
+          break;
+        case 'G':
+          window.scrollBy({
+            top: document.body.scrollHeight,
+            behavior: 'smooth',
+          });
+          break;
       }
     });
   }
