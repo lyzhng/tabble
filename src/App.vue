@@ -1,14 +1,12 @@
 <template>
-  <main>
+  <main id="app">
     <NavigationBar />
-    <SearchBar />
     <TabList />
   </main>
 </template>
 
 <script charset="utf-8">
 import TabList from './components/TabList.vue';
-import SearchBar from './components/SearchBar';
 import NavigationBar from './components/NavigationBar';
 
 export default {
@@ -46,8 +44,19 @@ export default {
   },
   components: {
     TabList,
-    SearchBar,
     NavigationBar,
   },
 };
 </script>
+
+<style lang="scss">
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap');
+$font-primary: 'Roboto Mono', monospace;
+main {
+  width: 65vw;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 0.5rem 1rem;
+  font-family: $font-primary;
+}
+</style>
