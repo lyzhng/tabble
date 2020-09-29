@@ -1,31 +1,29 @@
 <template>
-  <div class="tab-list">
-    <pre v-if="error">{{ error }}</pre>
-    <div class="list">
-      <ul v-for="(tabList, windowId, idx) in windowTabMapping" :key="windowId">
-        <li>
-          <h2>
-            <span class="close-icon" @click.stop.prevent="closeWindow(+windowId)">[X]</span>
-            {{ idx + 1 }} ({{ tabList.length }} tabs)
-          </h2>
-          <ul v-for="t in tabList" :key="t.id">
-            <li>
-              <span class="close-icon" @click.stop.prevent="closeTab(+t.id)">[X]</span>
-              <img class="favicon" :src="t.favIconUrl" alt="?" width="16" height="16" />
-              <a :href="t.url" @click.stop.prevent="switchTabAndWindow(+t.windowId, +t.id)">{{ t.title }}</a>
-            </li>
-          </ul>
-        </li>
-      </ul>
-    </div>
+  <div id="tab-list">
+    <ul v-for="(tabList, windowId) in windowTabMapping" :key="windowId">
+      <li>
+        <h2 id="window-info">
+          <span class="close-icon" @click.stop.prevent="closeWindow(+windowId)">[X]</span>
+          {{ windowId }} ({{ tabList.length }} tabs)
+        </h2>
+        <ul v-for="t in tabList" :key="t.id">
+          <li>
+            <span class="close-icon" @click.stop.prevent="closeTab(+t.id)">[X]</span>
+            <img class="favicon" :src="t.favIconUrl" alt="?" width="16" height="16" />
+            <a :href="t.url" @click.stop.prevent="switchTabAndWindow(+t.windowId, +t.id)">{{ t.title }}</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
   </div>
 </template>
 
 <script charset="utf-8" lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Watch } from 'vue-property-decorator';
 import { Fragment } from 'vue-fragment';
 import { Message } from '../utils/constants';
 import { ITab, IWindowToTab, IRequest, IData } from '../utils/types';
+import { mapGetters } from 'vuex';
 
 @Component
 export default class TabList extends Vue {
@@ -34,7 +32,7 @@ export default class TabList extends Vue {
 
   async mounted() {
     this.initMsgHandler();
-    this.$parent.$on('setTabs', (data) => {
+    this.$root.$on('setTabs', (data) => {
       this.windowTabMapping = {} as IWindowToTab;
       this.tabs = data;
       this.initWindowTabMapping();
@@ -155,3 +153,41 @@ export default class TabList extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+$primary-dark: #222831;
+$primary-light: lavender;
+ul {
+  list-style-position: outside;
+  li {
+    list-style-type: none;
+  }
+}
+
+img {
+  vertical-align: middle;
+}
+
+a {
+  text-decoration: none;
+  &:hover,
+  &:focus {
+    text-decoration: underline;
+  }
+}
+
+#tab-container,
+#tab-list {
+  width: 80%;
+  margin: 0 auto;
+  line-height: 1.25;
+}
+.close-icon {
+  margin: 0 0.5rem;
+  color: #f2a365;
+  &:hover,
+  &:focus {
+    cursor: pointer;
+  }
+}
+</style>
