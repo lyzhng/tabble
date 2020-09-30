@@ -22,7 +22,8 @@
     "sass": "^1.26.9",
     "serve": "^11.3.2",
     "vue-hot-reload-api": "^2.3.4",
-    "vue-template-compiler": "^2.6.11"
+    "vue-template-compiler": "^2.6.11",
+    "webextension-polyfill-ts": "^0.20.0"
   },
   "dependencies": {
     "@vue/cli": "^4.4.6",
