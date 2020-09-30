@@ -3,7 +3,7 @@
     <ul v-for="(tabList, windowId) in windowTabMapping" :key="windowId">
       <li>
         <h2 id="window-info">
-          <span class="close-icon" @click.stop.prevent="closeWindow(+windowId)">[X]</span>
+          <span class="close-icon" @click.stop.prevent="closeTabsInWindow(+windowId)">[X]</span>
           {{ windowId }} ({{ tabList.length }} tabs)
         </h2>
         <ul v-for="t in tabList" :key="t.id">
@@ -20,10 +20,10 @@
 
 <script charset="utf-8" lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator';
-import { Fragment } from 'vue-fragment';
+import { browser, Tabs } from 'webextension-polyfill-ts';
+
 import { Message } from '../utils/constants';
 import { ITab, IWindowToTab, IRequest, IData } from '../utils/types';
-import { mapGetters } from 'vuex';
 
 @Component
 export default class TabList extends Vue {
@@ -59,8 +59,10 @@ export default class TabList extends Vue {
     await browser.tabs.remove(tabId);
   }
 
-  async closeWindow(windowId: number): Promise<void> {
-    await browser.windows.remove(windowId);
+  async closeTabsInWindow(windowId: number): Promise<void> {
+    const tabsInWindow = this.windowTabMapping[windowId];
+    const removedTabs: Promise<void>[] = tabsInWindow.map((t) => browser.tabs.remove(t.id));
+    await Promise.all(removedTabs);
   }
 
   handleCreated(data: IData): void {
@@ -155,8 +157,6 @@ export default class TabList extends Vue {
 </script>
 
 <style lang="scss" scoped>
-$primary-dark: #222831;
-$primary-light: lavender;
 ul {
   list-style-position: outside;
   li {
@@ -184,7 +184,6 @@ a {
 }
 .close-icon {
   margin: 0 0.5rem;
-  color: #f2a365;
   &:hover,
   &:focus {
     cursor: pointer;
