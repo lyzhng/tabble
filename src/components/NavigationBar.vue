@@ -1,13 +1,13 @@
 <template>
   <nav>
     <h1 id="heading">
-      {{ heading }}
+      tabble, your tab manager
       <img
         @click.prevent.stop="toggleColorScheme"
         :src="
           colorScheme === 'light'
             ? 'https://api.iconify.design/uil-sun.svg?color=black'
-            : 'https://api.iconify.design/ion-moon.svg?color=yellow'
+            : 'https://api.iconify.design/ion-moon.svg?color=white'
         "
         width="32"
         height="32"
@@ -19,9 +19,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { Fragment } from 'vue-fragment';
+
 import SearchBar from './SearchBar';
-import { mapGetters } from 'vuex';
 
 @Component({
   components: {
@@ -29,8 +28,8 @@ import { mapGetters } from 'vuex';
   },
 })
 export default class NavigationBar extends Vue {
-  colorScheme: string = null;
-  readonly heading: string = 'tabble, your tab manager';
+  colorScheme: string =
+    window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 
   mounted() {
     this.initColorScheme();
@@ -38,7 +37,8 @@ export default class NavigationBar extends Vue {
   }
 
   initColorScheme() {
-    this.colorScheme = localStorage.getItem('color-scheme') ?? this.colorScheme;
+    const colorSchemeInStorage = JSON.parse(localStorage.getItem('color-scheme'));
+    this.colorScheme = colorSchemeInStorage ?? this.colorScheme;
     document.body.setAttribute('color-scheme', this.colorScheme);
   }
 
@@ -51,7 +51,7 @@ export default class NavigationBar extends Vue {
         this.colorScheme = 'light';
         break;
     }
-    localStorage.setItem('color-scheme', this.colorScheme);
+    localStorage.setItem('color-scheme', JSON.stringify(this.colorScheme));
     document.body.setAttribute('color-scheme', this.colorScheme);
   }
 
@@ -63,7 +63,7 @@ export default class NavigationBar extends Vue {
       } else {
         this.colorScheme = 'dark';
       }
-      localStorage.setItem('color-scheme', this.colorScheme);
+      localStorage.setItem('color-scheme', JSON.stringify(this.colorScheme));
       document.body.setAttribute('color-scheme', this.colorScheme);
     });
   }
