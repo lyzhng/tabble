@@ -1,3 +1,5 @@
+import { browser } from 'webextension-polyfill-ts';
+
 import { listTabs, openTabble } from './utils/helper';
 import { Message, Command } from './utils/constants';
 import { ITab, IRequest } from './utils/types';
