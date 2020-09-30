@@ -1,3 +1,4 @@
+import { browser } from 'webextension-polyfill-ts';
 import { TAB_PROPERTIES, Url } from './constants';
 import { ITab } from './types';
 
@@ -13,20 +14,19 @@ function filterList(tabList: Array<ITab>): Array<ITab> {
   return filteredList;
 }
 
-async function listTabs(): Promise<Array<ITab>> {
-  const tabList: Array<ITab> = await browser.tabs.query({});
-  return filterList(tabList);
+async function listTabs(query: string = ''): Promise<Array<ITab>> {
+  const standardizedQuery: string = query.toLowerCase();
+  const allTabs: Array<ITab> = await browser.tabs.query({});
+  if (query !== '') {
+    const queriedTabs: Array<ITab> = allTabs.filter((t: ITab) => new URL(t.url).hostname.includes(standardizedQuery));
+    return filterList(queriedTabs);
+  }
+  return filterList(allTabs);
 }
 
 async function checkTabble(): Promise<Array<ITab>> {
   const tabs: Array<ITab> = await listTabs();
-  const tabble: Array<ITab> = [];
-  for (const t of tabs) {
-    if (t.url === Url.TABBLE_EXT_URL) {
-      tabble.push(t);
-    }
-  }
-  return tabble;
+  return tabs.filter((t) => t.url === Url.TABBLE_EXT_URL);
 }
 
 async function openTabble(): Promise<void> {

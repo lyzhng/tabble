@@ -1,14 +1,16 @@
+import { browser } from 'webextension-polyfill-ts';
+
 import { listTabs, openTabble } from './utils/helper';
 import { Message, Command } from './utils/constants';
 import { ITab, IRequest } from './utils/types';
 
 async function handleMessage(req: IRequest): Promise<IRequest> {
   if (req.msg === Message.GET_TABS) {
-    const tabs: Array<ITab> = await listTabs();
+    const tabs: Array<ITab> = await listTabs(req.query);
     return {
       msg: Message.SEND_TABS,
       data: {
-        tabs
+        tabs,
       },
     };
   }
@@ -58,7 +60,10 @@ async function handleUpdated(tabId, changeInfo, tab: ITab): Promise<void> {
   });
 }
 
-async function handleMoved(tabId: number, moveInfo: { windowId: number, fromIndex: number, toIndex: number }): Promise<void> {
+async function handleMoved(
+  tabId: number,
+  moveInfo: { windowId: number; fromIndex: number; toIndex: number }
+): Promise<void> {
   const { windowId, fromIndex, toIndex } = moveInfo;
   const tab = await browser.tabs.get(tabId);
   await browser.runtime.sendMessage({
@@ -72,7 +77,7 @@ async function handleMoved(tabId: number, moveInfo: { windowId: number, fromInde
   });
 }
 
-async function handleAttached(tabId: number, attachInfo: { newWindowId: number, newPosition: number }): Promise<void> {
+async function handleAttached(tabId: number, attachInfo: { newWindowId: number; newPosition: number }): Promise<void> {
   const { newWindowId, newPosition } = attachInfo;
   const tab = await browser.tabs.get(tabId);
   await browser.runtime.sendMessage({
@@ -85,7 +90,7 @@ async function handleAttached(tabId: number, attachInfo: { newWindowId: number, 
   });
 }
 
-async function handleDetached(tabId: number, detachInfo: { oldWindowId: number, oldPosition: number }): Promise<void> {
+async function handleDetached(tabId: number, detachInfo: { oldWindowId: number; oldPosition: number }): Promise<void> {
   const { oldWindowId, oldPosition } = detachInfo;
   const tab = await browser.tabs.get(tabId);
   await browser.runtime.sendMessage({

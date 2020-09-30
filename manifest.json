@@ -1,16 +1,11 @@
 {
   "manifest_version": 2,
-  "name": "tabby",
+  "name": "tabble",
   "version": "1.0",
   "description": "View your tabs and windows from one place.",
-  "permissions": [
-    "<all_urls>",
-    "tabs"
-  ],
+  "permissions": ["<all_urls>", "tabs"],
   "background": {
-    "scripts": [
-      "dist/background.js"
-    ]
+    "scripts": ["dist/background.js"]
   },
   "browser_action": {},
   "commands": {

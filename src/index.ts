@@ -1,17 +1,26 @@
 import Vue from 'vue';
-import App from './App.vue';
+import App from './App';
+import Vuex from 'vuex';
 
 console.log('loading index.js!');
 
+Vue.use(Vuex);
+
+const store = new Vuex.Store({
+  state: {},
+  getters: {},
+  mutations: {},
+});
+
 new Vue({
-    el: '#app',
-    data: {
-        message: 'Hello Vue!',
-        template: '<App/>',
-        components: { App },
-    },
-    render: (h) => h(App),
-    mounted: function () {
-        console.log('mounted!');
-    },
+  el: '#app',
+  store,
+  data: {
+    template: '<App/>',
+    components: { App },
+  },
+  render: (h) => h(App),
+  mounted: function () {
+    console.log('mounted!');
+  },
 });
