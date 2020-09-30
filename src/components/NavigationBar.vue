@@ -83,6 +83,7 @@
   }
 
   img {
+    transform: scaleX(-1);
     vertical-align: middle;
     &[alt] {
       font-size: 1rem;
