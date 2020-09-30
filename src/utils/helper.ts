@@ -26,12 +26,12 @@ async function listTabs(query: string = ''): Promise<Array<ITab>> {
 
 async function checkTabble(): Promise<Array<ITab>> {
   const tabs: Array<ITab> = await listTabs();
-  return tabs.filter((t) => t.url === Url.TABBLE_EXT_URL);
+  return tabs.filter((t) => t.url.startsWith(Url.TABBLE_EXT_URL));
 }
 
 async function openTabble(): Promise<void> {
   const tabble = await checkTabble();
-  const ids: Array<number> = tabble.map((t) => t.id);
+  const ids: number[] = tabble.map((t) => t.id);
   await browser.tabs.remove(ids);
   await browser.tabs.create({ url: Url.TABBLE_REL_URL });
 }
