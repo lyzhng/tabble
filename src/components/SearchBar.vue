@@ -1,6 +1,7 @@
 <template>
   <form @submit.prevent.stop role="search">
-    <input type="text" v-model="query" @input="searchForTabs" placeholder="Search" id="search" />
+    <input type="text" v-model="query" @input="searchForTabs" placeholder="Search" id="search" autocomplete="off" />
+    <button type="button" @click.prevent.stop="clearInput">Clear Input</button>
   </form>
 </template>
 
@@ -24,6 +25,11 @@
         query: this.query,
       });
       this.$root.$emit('setTabs', res.data.tabs);
+    }
+
+    async clearInput() {
+      this.query = '';
+      await this.searchForTabs();
     }
   }
 </script>
