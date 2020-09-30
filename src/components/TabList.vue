@@ -106,7 +106,7 @@
       this.tabs = this.tabs.filter((t) => t.id !== tabId);
       this.$set(this.windowTabMapping, windowId, tabsInWindow);
       if (this.windowTabMapping[windowId].length === 0) {
-        delete this.windowTabMapping[windowId];
+        this.$delete(this.windowTabMapping, windowId);
       }
     }
 
@@ -147,7 +147,7 @@
       this.$delete(this.tabs, tabIndexInArr);
       this.$delete(tabsInWindow, oldPosition);
       if (tabsInWindow.length === 0) {
-        delete this.windowTabMapping[oldWindowId];
+        this.$delete(this.windowTabMapping, oldWindowId);
       }
     }
 
