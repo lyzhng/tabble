@@ -19,7 +19,7 @@
 </template>
 
 <script charset="utf-8" lang="ts">
-import { Component, Vue, Watch } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import { browser, Tabs } from 'webextension-polyfill-ts';
 
 import { Message } from '../utils/constants';
