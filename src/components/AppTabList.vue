@@ -1,33 +1,18 @@
 <template>
   <main role="main" id="main">
-    <ul v-for="(tabList, windowId) in windowTabMapping" :key="windowId">
+    <ul v-for="(tabList, windowId, idx) in windowTabMapping" :key="windowId">
       <li class="window-info">
-        <span
-          class="close-icon"
-          @click.stop.prevent="closeTabsInWindow(+windowId)"
-          @keyup.enter="closeTabsInWindow(+windowId)"
-          tabindex="0"
-          role="img"
-          aria-label="Close window"
-          title="Close window"
-          >X
-        </span>
-        {{ windowId }} ({{ tabList.length }} tabs)
+        <AppCloseButton
+          @click.stop.prevent.native="closeTabsInWindow(+windowId)"
+          @keyup.enter.native="closeTabsInWindow(+windowId)"
+        />
+        {{ idx + 1 }} ({{ tabList.length }} tabs)
       </li>
 
       <li>
         <ul v-for="t in tabList" :key="t.id" class="tablist">
           <li>
-            <span
-              class="close-icon"
-              @click.stop.prevent="closeTab(+t.id)"
-              @keyup.enter="closeTab(+t.id)"
-              tabindex="0"
-              role="img"
-              aria-label="Close tab"
-              title="Close tab"
-              >X</span
-            >
+            <AppCloseButton @click.stop.prevent.native="closeTab(+t.id)" @keyup.enter.native="closeTab(+t.id)" />
             <img :src="t.favIconUrl" alt="" :title="getHostname(t.url) + ' favicon'" width="16" height="16" />
             <a :href="t.url" @click.stop.prevent="switchTabAndWindow(+t.windowId, +t.id)" :title="'Go to ' + t.url">{{
               t.title
@@ -41,25 +26,24 @@
 
 <script charset="utf-8" lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { browser, Tabs } from 'webextension-polyfill-ts';
+import { browser, Tabs, Windows } from 'webextension-polyfill-ts';
 
 import { Message } from '../utils/constants';
-import { ITab, IWindowToTab, IRequest, IData } from '../utils/types';
-import CloseIcon from './CloseIcon';
+import AppCloseButton from './AppCloseButton.vue';
 
 @Component({
   components: {
-    CloseIcon,
+    AppCloseButton,
   },
 })
-export default class TabList extends Vue {
-  tabs: Array<ITab> = [];
-  windowTabMapping: IWindowToTab = {};
+export default class AppTabList extends Vue {
+  tabs: Partial<Tabs.Tab>[] = [];
+  windowTabMapping: Record<string, Partial<Tabs.Tab>[]> = {};
 
   async mounted() {
     this.initMsgHandler();
     this.$root.$on('setTabs', (data) => {
-      this.windowTabMapping = {} as IWindowToTab;
+      this.windowTabMapping = {};
       this.tabs = data;
       this.initWindowTabMapping();
     });
@@ -70,12 +54,14 @@ export default class TabList extends Vue {
   }
 
   initWindowTabMapping(): void {
-    this.tabs.forEach((t: ITab) => {
-      if (!(t.windowId in this.windowTabMapping)) {
-        this.$set(this.windowTabMapping, t.windowId, [t]);
-      } else {
-        const tabsInWindow: Array<ITab> = this.windowTabMapping[t.windowId];
-        tabsInWindow.push(t);
+    this.tabs.forEach((t) => {
+      if (t.windowId !== undefined) {
+        if (!(t.windowId in this.windowTabMapping)) {
+          this.$set(this.windowTabMapping, t.windowId, [t]);
+        } else {
+          const tabsInWindow: Partial<Tabs.Tab>[] = this.windowTabMapping[t.windowId];
+          tabsInWindow.push(t);
+        }
       }
     });
   }
@@ -91,24 +77,28 @@ export default class TabList extends Vue {
 
   async closeTabsInWindow(windowId: number): Promise<void> {
     const tabsInWindow = this.windowTabMapping[windowId];
-    const removedTabs: Promise<void>[] = tabsInWindow.map((t) => browser.tabs.remove(t.id));
+    const removedTabs: Promise<void>[] = tabsInWindow
+      .filter((t) => t.id !== undefined)
+      .map((t) => browser.tabs.remove(t.id!));
     await Promise.all(removedTabs);
   }
 
-  handleCreated(data: IData): void {
-    const { tab }: IData = data;
-    const { windowId, index }: ITab = tab;
+  handleCreated(data): void {
+    const { tab } = data;
+    const { windowId, index }: Tabs.Tab = tab;
     this.tabs.splice(index, 0, tab);
-    if (!(windowId in this.windowTabMapping)) {
-      this.$set(this.windowTabMapping, windowId, [tab]);
-    } else {
-      this.windowTabMapping[windowId].splice(index, 0, tab);
+    if (windowId !== undefined) {
+      if (!(windowId in this.windowTabMapping)) {
+        this.$set(this.windowTabMapping, windowId, [tab]);
+      } else {
+        this.windowTabMapping[windowId].splice(index, 0, tab);
+      }
     }
   }
 
-  handleRemoved(data: IData): void {
-    const { tabId, windowId }: IData = data;
-    const tabsInWindow: Array<ITab> = this.windowTabMapping[windowId].filter((t) => t.id !== tabId);
+  handleRemoved(data): void {
+    const { tabId, windowId } = data;
+    const tabsInWindow: Partial<Tabs.Tab>[] = this.windowTabMapping[windowId].filter((t) => t.id !== tabId);
     this.tabs = this.tabs.filter((t) => t.id !== tabId);
     this.$set(this.windowTabMapping, windowId, tabsInWindow);
     if (this.windowTabMapping[windowId].length === 0) {
@@ -116,18 +106,18 @@ export default class TabList extends Vue {
     }
   }
 
-  handleUpdated(data: IData): void {
-    const { tab }: IData = data;
-    const tabsInWindow: Array<ITab> = this.windowTabMapping[tab.windowId];
+  handleUpdated(data): void {
+    const { tab } = data;
+    const tabsInWindow: Partial<Tabs.Tab>[] = this.windowTabMapping[tab.windowId];
     const tabIndexInArr: number = this.tabs.findIndex((t) => t.id === tab.id);
     const tabIndexInMap: number = tabsInWindow.findIndex((t) => t.id === tab.id);
     this.$set(this.tabs, tabIndexInArr, tab);
     this.$set(this.windowTabMapping[tab.windowId], tabIndexInMap, tab);
   }
 
-  handleMoved(data: IData): void {
-    const { tab, windowId, fromIndex, toIndex }: IData = data;
-    const tabsInWindow: Array<ITab> = this.windowTabMapping[windowId];
+  handleMoved(data): void {
+    const { tab, windowId, fromIndex, toIndex } = data;
+    const tabsInWindow: Partial<Tabs.Tab>[] = this.windowTabMapping[windowId];
     const tabIndexInArr: number = this.tabs.findIndex((t) => t.id === tab.id);
     this.$delete(this.tabs, tabIndexInArr);
     this.tabs.splice(toIndex, 0, tab);
@@ -135,8 +125,8 @@ export default class TabList extends Vue {
     tabsInWindow.splice(toIndex, 0, tab);
   }
 
-  handleAttached(data: IData): void {
-    const { tab, newWindowId, newPosition }: IData = data;
+  handleAttached(data): void {
+    const { tab, newWindowId, newPosition } = data;
     const tabIndexInArr: number = this.tabs.findIndex((t) => t.id === tab.id);
     this.$set(this.tabs, tabIndexInArr, tab);
     if (!(newWindowId in this.windowTabMapping)) {
@@ -146,9 +136,9 @@ export default class TabList extends Vue {
     }
   }
 
-  handleDetached(data: IData): void {
-    const { tab, oldWindowId, oldPosition }: IData = data;
-    const tabsInWindow: Array<ITab> = this.windowTabMapping[oldWindowId];
+  handleDetached(data): void {
+    const { tab, oldWindowId, oldPosition } = data;
+    const tabsInWindow: Partial<Tabs.Tab>[] = this.windowTabMapping[oldWindowId];
     const tabIndexInArr: number = this.tabs.findIndex((t) => t.id === tab.id);
     this.$delete(this.tabs, tabIndexInArr);
     this.$delete(tabsInWindow, oldPosition);
@@ -158,9 +148,9 @@ export default class TabList extends Vue {
   }
 
   initMsgHandler(): void {
-    browser.runtime.onMessage.addListener((req: IRequest) => {
+    browser.runtime.onMessage.addListener((req) => {
       console.log(req);
-      const { msg, data }: IRequest = req;
+      const { msg, data } = req;
       switch (msg) {
         case Message.CREATE:
           this.handleCreated(data);
@@ -189,8 +179,10 @@ export default class TabList extends Vue {
 <style lang="scss" scoped>
 ul {
   list-style-position: outside;
+  line-height: 1.5;
   li {
     list-style-type: none;
+    box-sizing: border-box;
   }
 }
 

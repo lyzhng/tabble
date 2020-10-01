@@ -1,5 +1,5 @@
 <template>
-  <span id="top">
+  <span id="top" role="button" tabindex="0">
     <a href="#container" title="Go back to top">
       <svg
         fill="none"
@@ -16,17 +16,17 @@
 </template>
 
 <script lang="ts">
-  import Vue from 'vue';
-  import Component from 'vue-class-component';
+import Vue from 'vue';
+import Component from 'vue-class-component';
 
-  @Component
-  export default class SkipLinks extends Vue {}
+@Component
+export default class AppBackToTopArrow extends Vue {}
 </script>
 
 <style lang="scss" scoped>
-  #top {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-  }
+#top {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+}
 </style>
