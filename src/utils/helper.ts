@@ -14,12 +14,21 @@ function filterList(tabList: Array<ITab>): Array<ITab> {
   return filteredList;
 }
 
-async function listTabs(query: string = ''): Promise<Array<ITab>> {
-  const standardizedQuery: string = query.toLowerCase();
-  const allTabs: Array<ITab> = await browser.tabs.query({});
+async function listTabs(query: string = '', options?): Promise<Partial<Tabs.Tab>[]> {
+  const allTabs: Tabs.Tab[] = await browser.tabs.query({});
   if (query !== '') {
-    const queriedTabs: Array<ITab> = allTabs.filter((t: ITab) => new URL(t.url).hostname.includes(standardizedQuery));
-    return filterList(queriedTabs);
+    const standardizedQuery: string = query.toLowerCase();
+    const { isSearchTitleChecked, isSearchHostnameChecked } = options;
+    let queriedTabs: Set<Tabs.Tab> = new Set<Tabs.Tab>();
+    if (isSearchTitleChecked) {
+      const tabsWithQueryInTitle = allTabs.filter((t) => t.title?.toLowerCase().includes(standardizedQuery));
+      tabsWithQueryInTitle.forEach((t) => queriedTabs.add(t));
+    }
+    if (isSearchHostnameChecked) {
+      const tabsWithQueryInHostname = allTabs.filter((t) => t.url && new URL(t.url).hostname.includes(standardizedQuery));
+      tabsWithQueryInHostname.forEach((t) => queriedTabs.add(t));
+    }
+    return filterList(Array.from(queriedTabs));
   }
   return filterList(allTabs);
 }
