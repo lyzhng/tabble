@@ -2,9 +2,11 @@ body[color-scheme='light'] {
   background-color: #ffffff;
   #heading,
   .window-info,
-  a {
+  a,
+  label {
     color: #222222;
   }
+
   .close-icon {
     color: #ff0000;
   }
