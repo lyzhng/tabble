@@ -3,8 +3,8 @@
     <ul v-for="(tabList, windowId, idx) in windowTabMapping" :key="windowId">
       <li class="window-info">
         <AppCloseButton
-          @click.stop.prevent.native="closeTabsInWindow(+windowId)"
-          @keyup.enter.native="closeTabsInWindow(+windowId)"
+          @click.stop.prevent.native="showConfirmationModal(+windowId)"
+          @keyup.enter.native="showConfirmationModal(+windowId)"
         />
         {{ idx + 1 }} ({{ tabList.length }} tabs)
       </li>
@@ -40,12 +40,19 @@ export default class AppTabList extends Vue {
   tabs: Partial<Tabs.Tab>[] = [];
   windowTabMapping: Record<string, Partial<Tabs.Tab>[]> = {};
 
+  showConfirmationModal(windowId: number) {
+    this.$root.$emit('confirmForWindowId', windowId);
+  }
+
   async mounted() {
     this.initMsgHandler();
     this.$root.$on('setTabs', (data) => {
       this.windowTabMapping = {};
       this.tabs = data;
       this.initWindowTabMapping();
+    });
+    this.$root.$on('closeWindow', (windowId: number) => {
+      this.closeTabsInWindow(windowId);
     });
   }
 
