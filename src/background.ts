@@ -1,12 +1,11 @@
-import { browser } from 'webextension-polyfill-ts';
+import { browser, Tabs } from 'webextension-polyfill-ts';
 
 import { listTabs, openTabble } from './utils/helper';
 import { Message, Command } from './utils/constants';
-import { ITab, IRequest } from './utils/types';
 
-async function handleMessage(req: IRequest): Promise<IRequest> {
+async function handleMessage(req) {
   if (req.msg === Message.GET_TABS) {
-    const tabs: Array<ITab> = await listTabs(req.query);
+    const tabs: Partial<Tabs.Tab>[] = await listTabs(req.query, req.options);
     return {
       msg: Message.SEND_TABS,
       data: {
@@ -26,7 +25,7 @@ async function handleCommand(command: string): Promise<void> {
   }
 }
 
-async function handleCreated(tab: ITab): Promise<void> {
+async function handleCreated(tab: Tabs.Tab): Promise<void> {
   await browser.runtime.sendMessage({
     msg: Message.CREATE,
     data: {
@@ -46,12 +45,12 @@ async function handleRemoved(tabId: number, removeInfo: { windowId: number }): P
   });
 }
 
-const filter = {
+const filter: Tabs.UpdateFilter = {
   urls: ['<all_urls>'],
   properties: ['title', 'favIconUrl'],
 };
 
-async function handleUpdated(tabId, changeInfo, tab: ITab): Promise<void> {
+async function handleUpdated(tabId: number, changeInfo: Tabs.OnUpdatedChangeInfoType, tab: Tabs.Tab): Promise<void> {
   await browser.runtime.sendMessage({
     msg: Message.UPDATE,
     data: {
