@@ -82,14 +82,16 @@ export default class AppSearch extends Vue {
 </script>
 
 <style lang="scss" scoped>
-#search-options {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  margin: 1rem 0;
-}
 [type='checkbox'] {
   vertical-align: middle;
   margin: 0 0.5rem;
+}
+
+#search-options {
+  margin: 1rem 0;
+  display: flex;
+  gap: 2.5rem;
+  justify-content: center;
+  align-items: center;
 }
 </style>
