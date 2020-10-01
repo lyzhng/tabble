@@ -1,10 +1,12 @@
 body[color-scheme='light'] {
   background-color: #ffffff;
   #heading,
-  #window-info,
-  a {
+  .window-info,
+  a,
+  label {
     color: #222222;
   }
+
   .close-icon {
     color: #ff0000;
   }

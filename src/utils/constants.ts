@@ -1,17 +1,24 @@
 import { browser } from 'webextension-polyfill-ts';
-import { IUrl, IMessage, ICommand } from './types';
 
-const TAB_PROPERTIES: Array<string> = ['active', 'favIconUrl', 'index', 'pinned', 'title', 'url', 'windowId', 'id'];
+const TAB_PROPERTIES: string[] = ['active', 'favIconUrl', 'index', 'pinned', 'title', 'url', 'windowId', 'id'];
 
 const TABBLE_REL_URL: string = '../dist/index.html';
 const TABBLE_EXT_URL: string = browser.runtime.getURL(TABBLE_REL_URL);
 
-const Url: IUrl = {
+interface Url {
+  [key: string]: string;
+}
+
+const Url: Url = {
   TABBLE_REL_URL,
   TABBLE_EXT_URL,
 };
 
-const Message: IMessage = {
+interface Message {
+  [key: string]: string;
+}
+
+const Message: Message = {
   GET_TABS: 'get_tabs',
   SEND_TABS: 'send_tabs',
   CREATE: 'create',
@@ -22,7 +29,11 @@ const Message: IMessage = {
   DETACH: 'detach',
 };
 
-const Command: ICommand = {
+interface Command {
+  [key: string]: string;
+}
+
+const Command: Command = {
   OPEN: 'open',
 };
 
