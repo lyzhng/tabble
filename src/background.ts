@@ -63,7 +63,7 @@ async function handleMoved(
   tabId: number,
   moveInfo: { windowId: number; fromIndex: number; toIndex: number }
 ): Promise<void> {
-  const { windowId, fromIndex, toIndex } = moveInfo;
+  const { windowId, fromIndex, toIndex }: Tabs.OnMovedMoveInfoType = moveInfo;
   const tab = await browser.tabs.get(tabId);
   await browser.runtime.sendMessage({
     msg: Message.MOVE,
@@ -77,7 +77,7 @@ async function handleMoved(
 }
 
 async function handleAttached(tabId: number, attachInfo: { newWindowId: number; newPosition: number }): Promise<void> {
-  const { newWindowId, newPosition } = attachInfo;
+  const { newWindowId, newPosition }: Tabs.OnAttachedAttachInfoType = attachInfo;
   const tab = await browser.tabs.get(tabId);
   await browser.runtime.sendMessage({
     msg: Message.ATTACH,
@@ -90,7 +90,7 @@ async function handleAttached(tabId: number, attachInfo: { newWindowId: number; 
 }
 
 async function handleDetached(tabId: number, detachInfo: { oldWindowId: number; oldPosition: number }): Promise<void> {
-  const { oldWindowId, oldPosition } = detachInfo;
+  const { oldWindowId, oldPosition }: Tabs.OnDetachedDetachInfoType = detachInfo;
   const tab = await browser.tabs.get(tabId);
   await browser.runtime.sendMessage({
     msg: Message.DETACH,
