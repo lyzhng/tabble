@@ -34,7 +34,7 @@ async function handleCreated(tab: Tabs.Tab): Promise<void> {
   });
 }
 
-async function handleRemoved(tabId: number, removeInfo: { windowId: number }): Promise<void> {
+async function handleRemoved(tabId: number, removeInfo: Tabs.OnRemovedRemoveInfoType): Promise<void> {
   const { windowId } = removeInfo;
   await browser.runtime.sendMessage({
     msg: Message.REMOVE,

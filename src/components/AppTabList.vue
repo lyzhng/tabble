@@ -1,12 +1,12 @@
 <template>
   <main role="main" id="main">
-    <ul v-for="(tabList, windowId, idx) in windowTabMapping" :key="windowId">
+    <ul v-for="(tabList, windowId) in windowTabMapping" :key="windowId">
       <li class="window-info">
         <AppCloseButton
           @click.stop.prevent.native="showConfirmationModal(+windowId)"
           @keyup.enter.native="showConfirmationModal(+windowId)"
         />
-        {{ idx + 1 }} ({{ tabList.length }} tabs)
+        {{ windowId }} ({{ tabList.length }} tabs)
       </li>
 
       <li>
@@ -25,6 +25,7 @@
 </template>
 
 <script charset="utf-8" lang="ts">
+type ExtraTabInfo<T> = T & { tab?: Tabs.Tab; tabId?: number };
 import { Component, Vue } from 'vue-property-decorator';
 import { browser, Tabs, Windows } from 'webextension-polyfill-ts';
 
@@ -46,9 +47,9 @@ export default class AppTabList extends Vue {
 
   async mounted() {
     this.initMsgHandler();
-    this.$root.$on('setTabs', (data) => {
+    this.$root.$on('setTabs', (tabs: Partial<Tabs.Tab>[]) => {
       this.windowTabMapping = {};
-      this.tabs = data;
+      this.tabs = tabs;
       this.initWindowTabMapping();
     });
     this.$root.$on('closeWindow', (windowId: number) => {
@@ -90,7 +91,7 @@ export default class AppTabList extends Vue {
     await Promise.all(removedTabs);
   }
 
-  handleCreated(data): void {
+  handleCreated(data: { tab: Tabs.Tab }): void {
     const { tab } = data;
     const { windowId, index }: Tabs.Tab = tab;
     this.tabs.splice(index, 0, tab);
@@ -103,7 +104,7 @@ export default class AppTabList extends Vue {
     }
   }
 
-  handleRemoved(data): void {
+  handleRemoved(data: ExtraTabInfo<Tabs.OnRemovedRemoveInfoType>): void {
     const { tabId, windowId } = data;
     const tabsInWindow: Partial<Tabs.Tab>[] = this.windowTabMapping[windowId].filter((t) => t.id !== tabId);
     this.tabs = this.tabs.filter((t) => t.id !== tabId);
@@ -113,40 +114,46 @@ export default class AppTabList extends Vue {
     }
   }
 
-  handleUpdated(data): void {
+  handleUpdated(data: ExtraTabInfo<Tabs.OnUpdatedChangeInfoType>): void {
     const { tab } = data;
-    const tabsInWindow: Partial<Tabs.Tab>[] = this.windowTabMapping[tab.windowId];
-    const tabIndexInArr: number = this.tabs.findIndex((t) => t.id === tab.id);
-    const tabIndexInMap: number = tabsInWindow.findIndex((t) => t.id === tab.id);
-    this.$set(this.tabs, tabIndexInArr, tab);
-    this.$set(this.windowTabMapping[tab.windowId], tabIndexInMap, tab);
-  }
-
-  handleMoved(data): void {
-    const { tab, windowId, fromIndex, toIndex } = data;
-    const tabsInWindow: Partial<Tabs.Tab>[] = this.windowTabMapping[windowId];
-    const tabIndexInArr: number = this.tabs.findIndex((t) => t.id === tab.id);
-    this.$delete(this.tabs, tabIndexInArr);
-    this.tabs.splice(toIndex, 0, tab);
-    this.$delete(tabsInWindow, fromIndex);
-    tabsInWindow.splice(toIndex, 0, tab);
-  }
-
-  handleAttached(data): void {
-    const { tab, newWindowId, newPosition } = data;
-    const tabIndexInArr: number = this.tabs.findIndex((t) => t.id === tab.id);
-    this.$set(this.tabs, tabIndexInArr, tab);
-    if (!(newWindowId in this.windowTabMapping)) {
-      this.$set(this.windowTabMapping, newWindowId, [tab]);
-    } else {
-      this.windowTabMapping[newWindowId].splice(newPosition, 0, tab);
+    if (tab?.windowId !== undefined) {
+      const tabsInWindow: Partial<Tabs.Tab>[] = this.windowTabMapping[tab.windowId];
+      const tabIndexInArr: number = this.tabs.findIndex((t) => t.id === tab.id);
+      const tabIndexInMap: number = tabsInWindow.findIndex((t) => t.id === tab.id);
+      this.$set(this.tabs, tabIndexInArr, tab);
+      this.$set(this.windowTabMapping[tab.windowId], tabIndexInMap, tab);
     }
   }
 
-  handleDetached(data): void {
+  handleMoved(data: ExtraTabInfo<Tabs.OnMovedMoveInfoType>): void {
+    const { tab, windowId, fromIndex, toIndex } = data;
+    const tabsInWindow: Partial<Tabs.Tab>[] = this.windowTabMapping[windowId];
+    const tabIndexInArr: number = this.tabs.findIndex((t) => t.id === tab?.id);
+    this.$delete(this.tabs, tabIndexInArr);
+    this.$delete(tabsInWindow, fromIndex);
+    if (tab !== undefined) {
+      this.tabs.splice(toIndex, 0, tab);
+      tabsInWindow.splice(toIndex, 0, tab);
+    }
+  }
+
+  handleAttached(data: ExtraTabInfo<Tabs.OnAttachedAttachInfoType>): void {
+    const { tab, newWindowId, newPosition } = data;
+    const tabIndexInArr: number = this.tabs.findIndex((t) => t.id === tab?.id);
+    this.$set(this.tabs, tabIndexInArr, tab);
+    if (tab !== undefined) {
+      if (!(newWindowId in this.windowTabMapping)) {
+        this.$set(this.windowTabMapping, newWindowId, [tab]);
+      } else {
+        this.windowTabMapping[newWindowId].splice(newPosition, 0, tab);
+      }
+    }
+  }
+
+  handleDetached(data: ExtraTabInfo<Tabs.OnDetachedDetachInfoType>): void {
     const { tab, oldWindowId, oldPosition } = data;
     const tabsInWindow: Partial<Tabs.Tab>[] = this.windowTabMapping[oldWindowId];
-    const tabIndexInArr: number = this.tabs.findIndex((t) => t.id === tab.id);
+    const tabIndexInArr: number = this.tabs.findIndex((t) => t.id === tab?.id);
     this.$delete(this.tabs, tabIndexInArr);
     this.$delete(tabsInWindow, oldPosition);
     if (tabsInWindow.length === 0) {
