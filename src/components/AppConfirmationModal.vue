@@ -1,10 +1,10 @@
 <template>
   <div id="overlay">
     <div id="dialog-box">
-      <div class="dialog-title">
+      <div id="dialog-title">
         {{ modalTitle }}
         <span
-          class="close"
+          id="close-button"
           tabindex="0"
           role="button"
           @click.prevent.stop="cancel"
@@ -13,9 +13,9 @@
           >&times;
         </span>
       </div>
-      <div class="dialog-msg">
-        <p class="info">{{ modalInfo }}</p>
-        <p class="prompt">{{ modalPrompt }}</p>
+      <div id="dialog-msg">
+        <p id="dialog-info">{{ modalInfo }}</p>
+        <p id="dialog-prompt">{{ modalPrompt }}</p>
       </div>
       <div id="options">
         <button
@@ -108,7 +108,7 @@ p {
   justify-content: center;
 }
 
-.dialog-title {
+#dialog-title {
   position: absolute;
   top: 0;
   left: 0;
@@ -122,7 +122,20 @@ p {
   border-radius: 5px 5px 0 0;
 }
 
-.close {
+#dialog-msg {
+  color: white;
+  margin: 1rem;
+  line-height: 1.5rem;
+  font-size: 0.9rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  & > p {
+    flex-basis: 50%;
+  }
+}
+
+#close-button {
   position: absolute;
   display: inline-block;
   right: 0;
@@ -134,7 +147,7 @@ p {
   }
 }
 
-.close::after {
+#close-button::after {
   position: absolute;
   content: '';
   background-color: rgba(255, 255, 255, 0.25);
@@ -146,20 +159,6 @@ p {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-}
-
-.dialog-msg {
-  color: white;
-  margin: 1rem;
-  line-height: 1.5rem;
-  font-size: 0.9rem;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-}
-
-.dialog-msg > p {
-  flex-basis: 50%;
 }
 
 #options {
