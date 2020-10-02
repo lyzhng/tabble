@@ -2,28 +2,53 @@
   <div id="overlay">
     <div id="dialog-box">
       <div class="dialog-title">
-        {{ modalTitle }}<span class="close" role="button" @click.prevent.stop="hideConfirmationModal">&times;</span>
+        {{ modalTitle }}
+        <span
+          class="close"
+          tabindex="0"
+          role="button"
+          @click.prevent.stop="cancel"
+          @keyup.enter="cancel"
+          aria-label="Cancel"
+          >&times;
+        </span>
       </div>
       <div class="dialog-msg">
         <p class="info">{{ modalInfo }}</p>
         <p class="prompt">{{ modalPrompt }}</p>
       </div>
       <div id="options">
-        <button type="button" class="button-yes" @click.prevent.stop="closeWindow">Yes, I'm sure.</button>
-        <button type="button" class="button-no" @click.prevent.stop="hideConfirmationModal">No, don't close it.</button>
+        <button
+          type="button"
+          v-for="option in buttonOptions"
+          @click.prevent.stop="option.handler"
+          :key="option.displayedText"
+          :style="option.style"
+          :aria-label="option.displayedText"
+        >
+          {{ option.displayedText }}
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-interface OptionDetails {
+interface CancelOption {
+  handler: () => void;
+}
+
+interface ButtonOption {
   displayedText: string;
   handler: () => void;
   style?: {
     backgroundColor: string;
-    fontColor: string;
+    color: string;
   };
+}
+interface OptionDetails {
+  cancel: CancelOption;
+  buttonOptions: ButtonOption[];
 }
 
 import { Component, Vue, Prop } from 'vue-property-decorator';
@@ -32,15 +57,14 @@ export default class AppConfirmationModal extends Vue {
   @Prop(String) modalTitle: string | undefined;
   @Prop(String) modalInfo: string | undefined;
   @Prop(String) modalPrompt: string | undefined;
-  @Prop(Number) confirmForWindowId: number | undefined;
-  @Prop(Object) options: OptionDetails[] = [];
+  @Prop(Object) options!: OptionDetails;
 
-  hideConfirmationModal() {
-    this.$root.$emit('hideConfirmationModal');
+  get cancel() {
+    return this.options.cancel.handler;
   }
-  closeWindow() {
-    this.$root.$emit('closeWindow', this.confirmForWindowId);
-    this.hideConfirmationModal();
+
+  get buttonOptions() {
+    return this.options.buttonOptions;
   }
 }
 </script>
@@ -105,6 +129,9 @@ p {
   margin-right: 1rem;
   z-index: 1;
   text-align: center;
+  &:hover {
+    cursor: pointer;
+  }
 }
 
 .close::after {
@@ -151,18 +178,11 @@ p {
   &:hover {
     cursor: pointer;
   }
-}
-
-.button-yes {
-  background-color: #800000;
-  color: white;
-  font-weight: 700;
-  border-radius: 0 0 0 5px;
-}
-
-.button-no {
-  color: white;
-  background-color: #333;
-  border-radius: 0 0 5px 0;
+  &:first-child {
+    border-radius: 0 0 0 5px;
+  }
+  &:last-child {
+    border-radius: 0 0 5px 0;
+  }
 }
 </style>

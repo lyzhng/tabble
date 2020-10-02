@@ -1,14 +1,7 @@
 <template>
   <div id="container">
     <div id="content">
-      <AppConfirmationModal
-        v-if="confirmForWindowId"
-        :confirmForWindowId="confirmForWindowId"
-        modalTitle="Close this window?"
-        modalInfo="All of the tabs in this window will be closed. This tab includes blah blah blah blah. More and more and more and more info."
-        modalPrompt="Are you sure you want to continue?"
-        :options="options"
-      />
+      <AppCloseWindowConfirmation v-show="showCloseWindowConfirmation" />
       <AppNavigation />
       <AppTabList />
       <AppBackToTopArrow />
@@ -20,7 +13,7 @@
 import AppTabList from './components/AppTabList.vue';
 import AppNavigation from './components/AppNavigation.vue';
 import AppBackToTopArrow from './components/AppBackToTopArrow';
-import AppConfirmationModal from './components/AppConfirmationModal.vue';
+import AppCloseWindowConfirmation from './components/AppCloseWindowConfirmation.vue';
 
 export default {
   name: 'App',
@@ -28,22 +21,21 @@ export default {
     AppTabList,
     AppNavigation,
     AppBackToTopArrow,
-    AppConfirmationModal,
+    AppCloseWindowConfirmation,
   },
   data() {
     return {
-      confirmForWindowId: null,
+      showCloseWindowConfirmation: false,
     };
   },
   mounted() {
-    this.initKeyHandler();
     this.$root.$on('confirmForWindowId', (windowId) => {
-      this.confirmForWindowId = windowId;
+      this.showCloseWindowConfirmation = true;
     });
     this.$root.$on('hideConfirmationModal', () => {
-      this.confirmForWindowId = null;
+      this.showCloseWindowConfirmation = false;
     });
-    console.log('options from base', this.options);
+    this.initKeyHandler();
   },
   methods: {
     initKeyHandler() {
