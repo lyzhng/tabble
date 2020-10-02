@@ -65,10 +65,10 @@ export default class AppSearch extends Vue {
   }
 
   async reset() {
+    this.isSearchTitleChecked = true;
+    this.isSearchHostnameChecked = true;
     this.query = '';
     await this.searchForTabs();
-    this.isSearchTitleChecked = false;
-    this.isSearchHostnameChecked = false;
   }
 
   toggleIsSearchHostnameChecked() {

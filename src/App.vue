@@ -1,6 +1,7 @@
 <template>
   <div id="container">
     <div id="content">
+      <AppCloseWindowConfirmation v-show="showCloseWindowConfirmation" />
       <AppNavigation />
       <AppTabList />
       <AppBackToTopArrow />
@@ -12,6 +13,7 @@
 import AppTabList from './components/AppTabList.vue';
 import AppNavigation from './components/AppNavigation.vue';
 import AppBackToTopArrow from './components/AppBackToTopArrow';
+import AppCloseWindowConfirmation from './components/AppCloseWindowConfirmation.vue';
 
 export default {
   name: 'App',
@@ -19,8 +21,20 @@ export default {
     AppTabList,
     AppNavigation,
     AppBackToTopArrow,
+    AppCloseWindowConfirmation,
+  },
+  data() {
+    return {
+      showCloseWindowConfirmation: false,
+    };
   },
   mounted() {
+    this.$root.$on('confirmForWindowId', (windowId) => {
+      this.showCloseWindowConfirmation = true;
+    });
+    this.$root.$on('hideConfirmationModal', () => {
+      this.showCloseWindowConfirmation = false;
+    });
     this.initKeyHandler();
   },
   methods: {
@@ -59,9 +73,13 @@ export default {
 $font-primary: 'Roboto Mono', monospace;
 #container {
   font-family: $font-primary;
+  display: flex;
+  justify-content: center;
 }
 #content {
   width: 65vw;
+  position: absolute;
+  top: 0;
   min-height: 100vh;
   margin: 0 auto;
   padding: 0.5rem 1rem;
