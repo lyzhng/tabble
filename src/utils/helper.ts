@@ -1,28 +1,29 @@
 import { browser, Tabs } from 'webextension-polyfill-ts';
 import { TAB_PROPERTIES, Url } from './constants';
+import { SearchOptions } from './types';
 
 function filterList(tabList: Tabs.Tab[]): Partial<Tabs.Tab>[] {
-  const filteredList: Array<Tabs.Tab> = [];
+  const filteredList: Partial<Tabs.Tab>[] = [];
   for (const tab of tabList) {
-    const filteredTab: Tabs.Tab = {} as Tabs.Tab;
+    const filteredTab = {} as Partial<Tabs.Tab>;
     for (const prop of TAB_PROPERTIES) {
-      filteredTab[prop] = tab[prop];
+      (filteredTab as any)[prop] = (tab as any)[prop];
     }
     filteredList.push(filteredTab);
   }
   return filteredList;
 }
 
-interface Options {
-  [key: string]: string;
-}
-
-async function listTabs(query: string = '', options?: Options): Promise<Partial<Tabs.Tab>[]> {
-  const allTabs: Tabs.Tab[] = await browser.tabs.query({});
+async function listTabs(
+  query: string = '',
+  options?: SearchOptions,
+  tabs?: Tabs.Tab[] | undefined
+): Promise<Partial<Tabs.Tab>[]> {
+  const allTabs: Tabs.Tab[] = tabs ?? (await browser.tabs.query({}));
   if (query !== '') {
     const standardizedQuery: string = query.toLowerCase();
     const { isSearchTitleChecked, isSearchHostnameChecked } = options ?? {};
-    let queriedTabs: Set<Tabs.Tab> = new Set<Tabs.Tab>();
+    const queriedTabs: Set<Tabs.Tab> = new Set<Tabs.Tab>();
     if (isSearchTitleChecked) {
       const tabsWithQueryInTitle = allTabs.filter((t) => t.title?.toLowerCase().includes(standardizedQuery));
       tabsWithQueryInTitle.forEach((t) => queriedTabs.add(t));
