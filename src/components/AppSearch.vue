@@ -1,6 +1,6 @@
 <template>
   <form @submit.prevent.stop role="search">
-    <input type="text" v-model="query" @input="searchForTabs" placeholder="Search" id="search" autocomplete="off" />
+    <input type="text" v-model="query" @input="searchForTabs()" placeholder="Search" id="search" autocomplete="off" />
     <button type="button" @click.prevent.stop="reset">Reset</button>
     <button type="button" @click.prevent.stop="showOptions = !showOptions">Options</button>
     <div id="search-options" v-if="showOptions">
@@ -25,73 +25,136 @@
 </template>
 
 <script charset="utf-8" lang="ts">
-import { Component, Vue, Watch } from 'vue-property-decorator';
-import { browser } from 'webextension-polyfill-ts';
+  import { Component, Vue, Watch } from 'vue-property-decorator';
+  import { browser, Tabs } from 'webextension-polyfill-ts';
 
-import { Message } from '../utils/constants';
+  import { Message } from '../utils/constants';
+  import { BrowserMessage } from '../utils/types';
 
-@Component
-export default class AppSearch extends Vue {
-  query: string = '';
-  showOptions: boolean = false;
-  isSearchHostnameChecked: boolean = true;
-  isSearchTitleChecked: boolean = true;
+  type ExtraTabInfo<T> = T & { tab?: Tabs.Tab; tabId?: number };
 
-  @Watch('isSearchHostnameChecked')
-  async onIsSearchHostnameChecked() {
-    await this.searchForTabs();
+  @Component
+  export default class AppSearch extends Vue {
+    query: string = '';
+    showOptions: boolean = false;
+    isSearchHostnameChecked: boolean = true;
+    isSearchTitleChecked: boolean = true;
+    tabs: Partial<Tabs.Tab>[] = [];
+
+    @Watch('isSearchHostnameChecked')
+    async onIsSearchHostnameChecked() {
+      await this.searchForTabs();
+    }
+
+    @Watch('isSearchTitleChecked')
+    async onIsSearchTitleChecked() {
+      await this.searchForTabs();
+    }
+
+    @Watch('tabs')
+    onTabsChanged() {
+      this.$root.$emit('setTabs', this.tabs);
+    }
+
+    async mounted() {
+      this.initMsgHandler();
+      await this.searchForTabs();
+    }
+
+    async searchForTabs(tabs?: Tabs.Tab[] | undefined) {
+      const { isSearchHostnameChecked, isSearchTitleChecked } = this;
+
+      const msgObj = {
+        msg: Message.GET_TABS,
+        data: {
+          query: this.query,
+          options: {
+            isSearchHostnameChecked,
+            isSearchTitleChecked,
+          },
+        },
+      } as BrowserMessage;
+
+      if (tabs !== undefined) {
+        msgObj.msg = Message.HANDLE_REMOVED;
+        msgObj.data.tabs = tabs;
+      }
+
+      const res = await browser.runtime.sendMessage(msgObj);
+      this.tabs = res.data.tabs;
+    }
+
+    async reset() {
+      this.isSearchTitleChecked = true;
+      this.isSearchHostnameChecked = true;
+      this.query = '';
+      this.searchForTabs();
+    }
+
+    async handleCreated(): Promise<void> {
+      await this.searchForTabs();
+    }
+
+    async handleRemoved(tabs: Tabs.Tab[]): Promise<void> {
+      const { isSearchHostnameChecked, isSearchTitleChecked } = this;
+      await this.searchForTabs(tabs);
+    }
+
+    async handleUpdated(): Promise<void> {
+      await this.searchForTabs();
+    }
+
+    async handleMoved(): Promise<void> {
+      await this.searchForTabs();
+    }
+
+    async handleAttached(): Promise<void> {
+      await this.searchForTabs();
+    }
+
+    async handleDetached(): Promise<void> {
+      await this.searchForTabs();
+    }
+
+    initMsgHandler(): void {
+      browser.runtime.onMessage.addListener(async (req: BrowserMessage) => {
+        console.log(req);
+        switch (req.msg) {
+          case Message.CREATE:
+            await this.handleCreated();
+            break;
+          case Message.REMOVE:
+            await this.handleRemoved(req.data.tabs!);
+            break;
+          case Message.UPDATE:
+            await this.handleUpdated();
+            break;
+          case Message.MOVE:
+            await this.handleMoved();
+            break;
+          case Message.ATTACH:
+            await this.handleAttached();
+            break;
+          case Message.DETACH:
+            await this.handleDetached();
+            break;
+        }
+      });
+    }
   }
-
-  @Watch('isSearchTitleChecked')
-  async onIsSearchTitleChecked() {
-    await this.searchForTabs();
-  }
-
-  async mounted() {
-    await this.searchForTabs();
-  }
-
-  async searchForTabs() {
-    const { isSearchHostnameChecked, isSearchTitleChecked } = this;
-    const res = await browser.runtime.sendMessage({
-      msg: Message.GET_TABS,
-      query: this.query,
-      options: {
-        isSearchHostnameChecked,
-        isSearchTitleChecked,
-      },
-    });
-    this.$root.$emit('setTabs', res.data.tabs);
-  }
-
-  async reset() {
-    this.isSearchTitleChecked = true;
-    this.isSearchHostnameChecked = true;
-    this.query = '';
-    await this.searchForTabs();
-  }
-
-  toggleIsSearchHostnameChecked() {
-    this.isSearchHostnameChecked = !this.isSearchHostnameChecked;
-  }
-
-  toggleIsSearchTitleChecked() {
-    this.isSearchTitleChecked = !this.isSearchTitleChecked;
-  }
-}
 </script>
 
 <style lang="scss" scoped>
-[type='checkbox'] {
-  vertical-align: middle;
-  margin: 0 0.5rem;
-}
+  [type='checkbox'] {
+    vertical-align: middle;
+    margin: 0 0.5rem;
+  }
 
-#search-options {
-  margin: 1rem 0;
-  display: flex;
-  gap: 2.5rem;
-  justify-content: center;
-  align-items: center;
-}
+  #search-options {
+    margin: 1rem 0;
+    display: flex;
+    gap: 2.5rem;
+    justify-content: center;
+    align-items: center;
+  }
 </style>
