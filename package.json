@@ -6,10 +6,8 @@
   "author": "Lily Zhong <lilyzhongy@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "parcel run src/index.html src/background.ts --public-url '.'",
     "build": "parcel build src/index.html src/background.ts --public-url '.'",
-    "build-manifest": "parcel ./src/manifest.json",
-    "serve": "serve dist"
+    "prettier": "prettier src/ -w"
   },
   "devDependencies": {
     "@vue/component-compiler-utils": "^3.1.2",
