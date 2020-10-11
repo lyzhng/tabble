@@ -3,6 +3,6 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
-export default class AppCloseButton extends Vue {}
+  import { Component, Vue, Prop } from 'vue-property-decorator';
+  export default class AppCloseButton extends Vue {}
 </script>
