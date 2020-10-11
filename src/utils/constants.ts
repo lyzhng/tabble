@@ -6,7 +6,8 @@ const TABBLE_REL_URL: string = '../dist/index.html';
 const TABBLE_EXT_URL: string = browser.runtime.getURL(TABBLE_REL_URL);
 
 interface Url {
-  [key: string]: string;
+  TABBLE_REL_URL: string;
+  TABBLE_EXT_URL: string;
 }
 
 const Url: Url = {
@@ -14,27 +15,20 @@ const Url: Url = {
   TABBLE_EXT_URL,
 };
 
-interface Message {
-  [key: string]: string;
+enum Message {
+  GET_TABS = 'GET_TABS',
+  SEND_TABS = 'SEND_TABS',
+  CREATE = 'CREATE',
+  MOVE = 'MOVE',
+  UPDATE = 'UPDATE',
+  REMOVE = 'REMOVE',
+  ATTACH = 'ATTACH',
+  DETACH = 'DETACH',
+  HANDLE_REMOVED = 'HANDLE_REMOVED',
 }
 
-const Message: Message = {
-  GET_TABS: 'get_tabs',
-  SEND_TABS: 'send_tabs',
-  CREATE: 'create',
-  MOVE: 'move',
-  UPDATE: 'update',
-  REMOVE: 'remove',
-  ATTACH: 'attach',
-  DETACH: 'detach',
-};
-
-interface Command {
-  [key: string]: string;
+enum Command {
+  OPEN = 'OPEN',
 }
-
-const Command: Command = {
-  OPEN: 'open',
-};
 
 export { TAB_PROPERTIES, Url, Message, Command };
