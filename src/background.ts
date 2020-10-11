@@ -2,14 +2,28 @@ import { browser, Tabs } from 'webextension-polyfill-ts';
 
 import { listTabs, openTabble } from './utils/helper';
 import { Message, Command } from './utils/constants';
+import { BrowserMessage } from './utils/types';
 
-async function handleMessage(req) {
-  if (req.msg === Message.GET_TABS) {
-    const tabs: Partial<Tabs.Tab>[] = await listTabs(req.query, req.options);
+async function handleMessage(req: BrowserMessage) {
+  const {
+    msg,
+    data: { query, options, tabs },
+  } = req;
+  if (msg === Message.GET_TABS) {
+    const _tabs: Partial<Tabs.Tab>[] = await listTabs(query, options);
     return {
       msg: Message.SEND_TABS,
       data: {
-        tabs,
+        tabs: _tabs,
+      },
+    };
+  }
+  if (msg === Message.HANDLE_REMOVED) {
+    const _tabs: Partial<Tabs.Tab>[] = await listTabs(query, options, tabs);
+    return {
+      msg: Message.SEND_TABS,
+      data: {
+        tabs: _tabs,
       },
     };
   }
@@ -28,19 +42,15 @@ async function handleCommand(command: string): Promise<void> {
 async function handleCreated(tab: Tabs.Tab): Promise<void> {
   await browser.runtime.sendMessage({
     msg: Message.CREATE,
-    data: {
-      tab,
-    },
   });
 }
 
-async function handleRemoved(tabId: number, removeInfo: Tabs.OnRemovedRemoveInfoType): Promise<void> {
-  const { windowId } = removeInfo;
+async function handleRemoved(tabId: number): Promise<void> {
+  const tabs = (await browser.tabs.query({})).filter((t) => t.id !== tabId);
   await browser.runtime.sendMessage({
     msg: Message.REMOVE,
     data: {
-      tabId,
-      windowId,
+      tabs,
     },
   });
 }
@@ -50,55 +60,27 @@ const filter: Tabs.UpdateFilter = {
   properties: ['title', 'favIconUrl'],
 };
 
-async function handleUpdated(tabId: number, changeInfo: Tabs.OnUpdatedChangeInfoType, tab: Tabs.Tab): Promise<void> {
+async function handleUpdated(): Promise<void> {
   await browser.runtime.sendMessage({
     msg: Message.UPDATE,
-    data: {
-      tab,
-    },
   });
 }
 
-async function handleMoved(
-  tabId: number,
-  moveInfo: { windowId: number; fromIndex: number; toIndex: number }
-): Promise<void> {
-  const { windowId, fromIndex, toIndex }: Tabs.OnMovedMoveInfoType = moveInfo;
-  const tab = await browser.tabs.get(tabId);
+async function handleMoved(): Promise<void> {
   await browser.runtime.sendMessage({
     msg: Message.MOVE,
-    data: {
-      tab,
-      windowId,
-      fromIndex,
-      toIndex,
-    },
   });
 }
 
-async function handleAttached(tabId: number, attachInfo: { newWindowId: number; newPosition: number }): Promise<void> {
-  const { newWindowId, newPosition }: Tabs.OnAttachedAttachInfoType = attachInfo;
-  const tab = await browser.tabs.get(tabId);
+async function handleAttached(): Promise<void> {
   await browser.runtime.sendMessage({
     msg: Message.ATTACH,
-    data: {
-      tab,
-      newWindowId,
-      newPosition,
-    },
   });
 }
 
-async function handleDetached(tabId: number, detachInfo: { oldWindowId: number; oldPosition: number }): Promise<void> {
-  const { oldWindowId, oldPosition }: Tabs.OnDetachedDetachInfoType = detachInfo;
-  const tab = await browser.tabs.get(tabId);
+async function handleDetached(): Promise<void> {
   await browser.runtime.sendMessage({
     msg: Message.DETACH,
-    data: {
-      tab,
-      oldWindowId,
-      oldPosition,
-    },
   });
 }
 
