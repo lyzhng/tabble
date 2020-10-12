@@ -13,7 +13,9 @@
         <ul v-for="t in tabList" :key="t.id" class="tablist">
           <li>
             <AppCloseButton @click.stop.prevent.native="closeTab(+t.id)" @keyup.enter.native="closeTab(+t.id)" />
-            <img :src="t.favIconUrl" alt="" :title="getHostname(t.url) + ' favicon'" width="16" height="16" />
+            <AppPinControl v-if="isValidProtocol(t.protocol)" :tab="t" />
+            <AppSoundControlButton :tab="t" />
+            <img :src="t.favIconUrl" alt="" :title="t.hostname + ' favicon'" width="16" height="16" />
             <a :href="t.url" @click.stop.prevent="switchTabAndWindow(+t.windowId, +t.id)" :title="'Go to ' + t.url">{{
               t.title
             }}</a>
@@ -25,16 +27,21 @@
 </template>
 
 <script charset="utf-8" lang="ts">
-  type ExtraTabInfo<T> = T & { tab?: Tabs.Tab; tabId?: number };
   import { Component, Vue } from 'vue-property-decorator';
   import { browser, Tabs, Windows } from 'webextension-polyfill-ts';
 
   import { Message } from '../utils/constants';
   import AppCloseButton from './AppCloseButton.vue';
+  import AppSoundControlButton from './AppSoundControlButton.vue';
+  import AppPinControl from './AppPinControl.vue';
+
+  const INVALID_PROTOCOLS = ['about:', 'moz-extension:'];
 
   @Component({
     components: {
       AppCloseButton,
+      AppSoundControlButton,
+      AppPinControl,
     },
   })
   export default class AppTabList extends Vue {
@@ -56,8 +63,13 @@
       });
     }
 
-    getHostname(url: string): string {
-      return new URL(url).hostname;
+    isValidProtocol(protocol: string): boolean {
+      for (const p of INVALID_PROTOCOLS) {
+        if (protocol.startsWith(p)) {
+          return false;
+        }
+      }
+      return true;
     }
 
     initWindowTabMapping(): void {
