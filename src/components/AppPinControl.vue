@@ -1,8 +1,8 @@
 <template>
-  <span>
-    <span v-if="pinned" @click="togglePin">Unpin</span>
-    <span v-else @click="togglePin">Pin</span>
-  </span>
+  <div>
+    <button v-if="pinned" @click.prevent.stop="togglePin" title="Unpin tab" aria-label="Unpin tab">&#128204;</button>
+    <button v-else @click.prevent.stop="togglePin" title="Pin tab" aria-label="Pin tab">&#129527;</button>
+  </div>
 </template>
 
 <script lang="ts">
@@ -31,7 +31,15 @@
 </script>
 
 <style lang="scss" scoped>
-  span {
-    color: white;
+div {
+  display: inline-block;
+}
+
+button {
+  border: none;
+  background-color: transparent;
+  &:hover {
+    cursor: pointer;
   }
+}
 </style>
