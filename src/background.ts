@@ -4,7 +4,7 @@ import { listTabs, openTabble } from './utils/helper';
 import { Message, Command } from './utils/constants';
 import { BrowserMessage } from './utils/types';
 
-async function handleMessage(req: BrowserMessage) {
+async function handleMessage(req) {
   const {
     msg,
     data: { query, options, tabs },
@@ -27,6 +27,18 @@ async function handleMessage(req: BrowserMessage) {
       },
     };
   }
+  if (msg === Message.TOGGLE_MUTE) {
+    const { id, mutedInfo }: Partial<Tabs.Tab> = req.data.tab;
+    await browser.tabs.update(id, {
+      muted: !mutedInfo?.muted,
+    });
+  }
+  if (msg === Message.TOGGLE_PIN) {
+    const { id, pinned }: Partial<Tabs.Tab> = req.data.tab;
+    await browser.tabs.update(id, {
+      pinned: !pinned,
+    });
+  }
 }
 
 async function handleClicked(): Promise<void> {
@@ -39,7 +51,7 @@ async function handleCommand(command: string): Promise<void> {
   }
 }
 
-async function handleCreated(tab: Tabs.Tab): Promise<void> {
+async function handleCreated(): Promise<void> {
   await browser.runtime.sendMessage({
     msg: Message.CREATE,
   });
@@ -56,8 +68,8 @@ async function handleRemoved(tabId: number): Promise<void> {
 }
 
 const filter: Tabs.UpdateFilter = {
-  urls: ['<all_urls>'],
-  properties: ['title', 'favIconUrl'],
+  urls: ['<all_urls>'], // dpesn't listen to about:*, moz-extension;//*, about:*
+  properties: ['title', 'favIconUrl', 'audible', 'mutedInfo', 'pinned'],
 };
 
 async function handleUpdated(): Promise<void> {
