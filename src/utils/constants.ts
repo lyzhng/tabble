@@ -1,7 +1,5 @@
 import { browser } from 'webextension-polyfill-ts';
 
-const TAB_PROPERTIES: string[] = ['active', 'favIconUrl', 'index', 'pinned', 'title', 'url', 'windowId', 'id'];
-
 const TABBLE_REL_URL: string = '../dist/index.html';
 const TABBLE_EXT_URL: string = browser.runtime.getURL(TABBLE_REL_URL);
 
@@ -15,6 +13,8 @@ const Url: Url = {
   TABBLE_EXT_URL,
 };
 
+Object.freeze(Url);
+
 enum Message {
   GET_TABS = 'GET_TABS',
   SEND_TABS = 'SEND_TABS',
@@ -25,10 +25,12 @@ enum Message {
   ATTACH = 'ATTACH',
   DETACH = 'DETACH',
   HANDLE_REMOVED = 'HANDLE_REMOVED',
+  TOGGLE_MUTE = 'TOGGLE_MUTE',
+  TOGGLE_PIN = 'TOGGLE_PIN',
 }
 
 enum Command {
   OPEN = 'OPEN',
 }
 
-export { TAB_PROPERTIES, Url, Message, Command };
+export { Url, Message, Command };
