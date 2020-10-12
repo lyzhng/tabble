@@ -14,7 +14,7 @@
           <li>
             <AppCloseButton @click.stop.prevent.native="closeTab(+t.id)" @keyup.enter.native="closeTab(+t.id)" />
             <AppPinControl v-if="isValidProtocol(t.protocol)" :tab="t" />
-            <AppSoundControlButton :tab="t" />
+            <AppSoundControlButton v-if="isValidProtocol(t.protocol)" :tab="t" />
             <img :src="t.favIconUrl" alt="" :title="t.hostname + ' favicon'" width="16" height="16" />
             <a :href="t.url" @click.stop.prevent="switchTabAndWindow(+t.windowId, +t.id)" :title="'Go to ' + t.url">{{
               t.title
@@ -35,7 +35,8 @@
   import AppSoundControlButton from './AppSoundControlButton.vue';
   import AppPinControl from './AppPinControl.vue';
 
-  const INVALID_PROTOCOLS = ['about:', 'moz-extension:'];
+  const VALID_PROTOCOLS = ['http:', 'https:', 'ws', 'wss', 'ftp', 'ftps',
+    'data', 'file'];
 
   @Component({
     components: {
@@ -64,12 +65,12 @@
     }
 
     isValidProtocol(protocol: string): boolean {
-      for (const p of INVALID_PROTOCOLS) {
+      for (const p of VALID_PROTOCOLS) {
         if (protocol.startsWith(p)) {
-          return false;
+          return true;
         }
       }
-      return true;
+      return false;
     }
 
     initWindowTabMapping(): void {
