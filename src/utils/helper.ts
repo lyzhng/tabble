@@ -1,13 +1,33 @@
 import { browser, Tabs } from 'webextension-polyfill-ts';
-import { TAB_PROPERTIES, Url } from './constants';
+import { Url } from './constants';
 import { SearchOptions } from './types';
+import { PartialTabWithURL } from './types';
+
+type PartialTabWithURL = Partial<Tabs.Tab> & { hostname: string; protocol: string };
+const TAB_PROPERTIES: (keyof Tabs.Tab)[] = [
+  'active',
+  'favIconUrl',
+  'index',
+  'pinned',
+  'title',
+  'url',
+  'windowId',
+  'id',
+  'audible',
+  'mutedInfo',
+];
 
 function filterList(tabList: Tabs.Tab[]): Partial<Tabs.Tab>[] {
   const filteredList: Partial<Tabs.Tab>[] = [];
   for (const tab of tabList) {
-    const filteredTab = {} as Partial<Tabs.Tab>;
+    const filteredTab = {} as PartialTabWithURL;
     for (const prop of TAB_PROPERTIES) {
-      (filteredTab as any)[prop] = (tab as any)[prop];
+      filteredTab[prop] = tab[prop]!;
+    }
+    if (tab.url !== undefined) {
+      const url: URL = new URL(tab.url);
+      filteredTab.hostname = url.hostname;
+      filteredTab.protocol = url.protocol;
     }
     filteredList.push(filteredTab);
   }
