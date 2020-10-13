@@ -51,9 +51,9 @@ async function handleMessage(req) {
   if (msg === Message.CLOSE_TABS_IN_WINDOW) {
     const { tabs } = req.data;
     const removedTabs: Promise<void>[] = tabs
-        .filter((t: Partial<Tabs.Tab>) => t.id !== undefined)
-        .map((t: Partial<Tabs.Tab>) => browser.tabs.remove(t.id!));
-    await Promise.all(removedTabs); 
+      .filter((t: Partial<Tabs.Tab>) => t.id !== undefined)
+      .map((t: Partial<Tabs.Tab>) => browser.tabs.remove(t.id!));
+    await Promise.all(removedTabs);
   }
 }
 

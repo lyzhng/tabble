@@ -107,7 +107,7 @@
         data: {
           tabId,
           windowId,
-        }
+        },
       });
     }
 
@@ -115,8 +115,8 @@
       await browser.runtime.sendMessage({
         msg: Message.CLOSE_TAB,
         data: {
-          tabId
-        }
+          tabId,
+        },
       });
     }
 
@@ -125,8 +125,8 @@
       await browser.runtime.sendMessage({
         msg: Message.CLOSE_TABS_IN_WINDOW,
         data: {
-          tabs: tabsInWindow
-        }
+          tabs: tabsInWindow,
+        },
       });
     }
   }
