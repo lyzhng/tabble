@@ -39,6 +39,22 @@ async function handleMessage(req) {
       pinned: !pinned,
     });
   }
+  if (msg === Message.SWITCH_TO_TAB_AND_WINDOW) {
+    const { tabId, windowId } = req.data;
+    await browser.tabs.update(tabId, { active: true });
+    await browser.windows.update(windowId, { focused: true });
+  }
+  if (msg === Message.CLOSE_TAB) {
+    const { tabId } = req.data;
+    await browser.tabs.remove(tabId);
+  }
+  if (msg === Message.CLOSE_TABS_IN_WINDOW) {
+    const { tabs } = req.data;
+    const removedTabs: Promise<void>[] = tabs
+        .filter((t: Partial<Tabs.Tab>) => t.id !== undefined)
+        .map((t: Partial<Tabs.Tab>) => browser.tabs.remove(t.id!));
+    await Promise.all(removedTabs); 
+  }
 }
 
 async function handleClicked(): Promise<void> {

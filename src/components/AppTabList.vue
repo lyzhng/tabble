@@ -102,20 +102,32 @@
     }
 
     async switchTabAndWindow(windowId: number, tabId: number): Promise<void> {
-      await browser.tabs.update(tabId, { active: true });
-      await browser.windows.update(windowId, { focused: true });
+      await browser.runtime.sendMessage({
+        msg: Message.SWITCH_TO_TAB_AND_WINDOW,
+        data: {
+          tabId,
+          windowId,
+        }
+      });
     }
 
     async closeTab(tabId: number): Promise<void> {
-      await browser.tabs.remove(tabId);
+      await browser.runtime.sendMessage({
+        msg: Message.CLOSE_TAB,
+        data: {
+          tabId
+        }
+      });
     }
 
     async closeTabsInWindow(windowId: number): Promise<void> {
       const tabsInWindow = this.windowTabMapping[windowId];
-      const removedTabs: Promise<void>[] = tabsInWindow
-        .filter((t) => t.id !== undefined)
-        .map((t) => browser.tabs.remove(t.id!));
-      await Promise.all(removedTabs);
+      await browser.runtime.sendMessage({
+        msg: Message.CLOSE_TABS_IN_WINDOW,
+        data: {
+          tabs: tabsInWindow
+        }
+      });
     }
   }
 </script>
@@ -166,7 +178,6 @@
   .table {
     display: table;
     border-collapse: separate;
-    border-spacing: 0.25rem 0;
   }
 
   .row {
@@ -175,5 +186,14 @@
 
   .cell {
     display: table-cell;
+    &:not(.cell:last-child) {
+      text-align: center;
+    }
+    &:last-child {
+      padding: 0 0.25rem;
+    }
+    &:nth-last-child(2) {
+      padding: 0 0.5rem;
+    }
   }
 </style>
