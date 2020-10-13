@@ -39,20 +39,14 @@
     colorScheme: string =
       window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 
-    async mounted() {
-      console.log('original', this.colorScheme);
-      await this.initColorScheme();
+    mounted() {
+      this.initColorScheme();
       this.initColorSchemeHandler();
-      console.log('after everything', this.colorScheme);
     }
 
-    async initColorScheme() {
-      const item = await browser.storage.local.get('color-scheme');
-      const colorScheme: string | undefined = item['color-scheme'];
-      console.log(typeof colorScheme);
-      console.log('current actual colorscheme is', this.colorScheme);
-      console.log('initColorScheme', colorScheme);
-      this.colorScheme = colorScheme ?? this.colorScheme;
+    initColorScheme() {
+      const colorSchemeInStorage = JSON.parse(localStorage.getItem('colorScheme')!);
+      this.colorScheme = colorSchemeInStorage ?? this.colorScheme;
       document.body.setAttribute('color-scheme', this.colorScheme);
     }
 
@@ -65,23 +59,19 @@
           this.colorScheme = 'light';
           break;
       }
-      await browser.storage.local.set({
-        'color-scheme': this.colorScheme
-      });
+      localStorage.setItem('colorScheme', JSON.stringify(this.colorScheme));
       document.body.setAttribute('color-scheme', this.colorScheme);
     }
 
     initColorSchemeHandler() {
       const mql = window.matchMedia('(prefers-color-scheme: light)');
-      mql.addEventListener('change', async (e) => {
+      mql.addEventListener('change', (e) => {
         if (e.matches) {
           this.colorScheme = 'light';
         } else {
           this.colorScheme = 'dark';
         }
-        await browser.storage.local.set({
-          'color-scheme': this.colorScheme
-        })
+        localStorage.setItem('colorScheme', JSON.stringify(this.colorScheme));
         document.body.setAttribute('color-scheme', this.colorScheme);
       });
     }
