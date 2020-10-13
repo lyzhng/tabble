@@ -40,6 +40,10 @@
     methods: {
       initKeyHandler() {
         document.addEventListener('keydown', ({ key }) => {
+          const searchInputElmt = document.querySelector('#search');
+          if (document.activeElement === searchInputElmt) {
+            return;
+          }
           const height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
           const scrollAmt = height * 0.15;
           switch (key) {
