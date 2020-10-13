@@ -5,20 +5,36 @@
         <AppCloseButton
           @click.stop.prevent.native="showConfirmationModal(+windowId)"
           @keyup.enter.native="showConfirmationModal(+windowId)"
+          :title="'Close window'"
         />
         {{ windowId }} ({{ tabList.length }} tabs)
       </li>
 
       <li>
-        <ul v-for="t in tabList" :key="t.id" class="tablist">
+        <ul class="table">
           <li>
-            <AppCloseButton @click.stop.prevent.native="closeTab(+t.id)" @keyup.enter.native="closeTab(+t.id)" />
-            <AppPinControl v-if="isValidProtocol(t.protocol)" :tab="t" />
-            <AppSoundControlButton v-if="isValidProtocol(t.protocol)" :tab="t" />
-            <img :src="t.favIconUrl" alt="" :title="t.hostname + ' favicon'" width="16" height="16" />
-            <a :href="t.url" @click.stop.prevent="switchTabAndWindow(+t.windowId, +t.id)" :title="'Go to ' + t.url">{{
-              t.title
-            }}</a>
+            <ul class="row tablist" v-for="t in tabList" :key="t.id">
+              <li class="cell">
+                <AppCloseButton
+                  @click.stop.prevent.native="closeTab(+t.id)"
+                  @keyup.enter.native="closeTab(+t.id)"
+                  :title="'Close tab'"
+                />
+              </li>
+              <li class="cell"><AppPinControl v-if="isValidProtocol(t.protocol)" :tab="t" /></li>
+              <li class="cell"><AppSoundControlButton v-if="isValidProtocol(t.protocol)" :tab="t" /></li>
+              <li class="cell">
+                <img :src="t.favIconUrl" alt="" :title="t.hostname + ' favicon'" width="16" height="16" />
+              </li>
+              <li class="cell">
+                <a
+                  :href="t.url"
+                  @click.stop.prevent="switchTabAndWindow(+t.windowId, +t.id)"
+                  :title="'Go to ' + t.url"
+                  >{{ t.title }}</a
+                >
+              </li>
+            </ul>
           </li>
         </ul>
       </li>
@@ -35,8 +51,7 @@
   import AppSoundControlButton from './AppSoundControlButton.vue';
   import AppPinControl from './AppPinControl.vue';
 
-  const VALID_PROTOCOLS = ['http:', 'https:', 'ws', 'wss', 'ftp', 'ftps',
-    'data', 'file'];
+  const VALID_PROTOCOLS = ['http:', 'https:', 'ws', 'wss', 'ftp', 'ftps', 'data', 'file'];
 
   @Component({
     components: {
@@ -146,5 +161,19 @@
     &:focus {
       cursor: pointer;
     }
+  }
+
+  .table {
+    display: table;
+    border-collapse: separate;
+    border-spacing: 0.25rem 0;
+  }
+
+  .row {
+    display: table-row;
+  }
+
+  .cell {
+    display: table-cell;
   }
 </style>
