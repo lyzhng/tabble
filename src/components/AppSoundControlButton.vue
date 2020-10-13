@@ -1,7 +1,11 @@
 <template>
   <div>
-      <button v-if="audible && !muted" @click.prevent.stop="toggleMute" title="Mute tab" aria-label="Mute tab">&#128266;</button>
-      <button v-else-if="muted" @click.prevent.stop="toggleMute" title="Unmute tab" aria-label="Unmute tab">&#128263;</button>
+    <button v-if="audible && !muted" @click.prevent.stop="toggleMute" title="Mute tab" aria-label="Mute tab">
+      &#128266;
+    </button>
+    <button v-else-if="muted" @click.prevent.stop="toggleMute" title="Unmute tab" aria-label="Unmute tab">
+      &#128263;
+    </button>
   </div>
 </template>
 
@@ -36,15 +40,15 @@
 </script>
 
 <style lang="scss" scoped>
-div {
-  display: inline;
-}
-
-button {
-  border: none;
-  background-color: transparent;
-  &:hover {
-    cursor: pointer;
+  div {
+    display: inline;
   }
-}
+
+  button {
+    border: none;
+    background-color: transparent;
+    &:hover {
+      cursor: pointer;
+    }
+  }
 </style>

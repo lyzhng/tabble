@@ -31,15 +31,15 @@
 </script>
 
 <style lang="scss" scoped>
-div {
-  display: inline-block;
-}
-
-button {
-  border: none;
-  background-color: transparent;
-  &:hover {
-    cursor: pointer;
+  div {
+    display: inline-block;
   }
-}
+
+  button {
+    border: none;
+    background-color: transparent;
+    &:hover {
+      cursor: pointer;
+    }
+  }
 </style>
