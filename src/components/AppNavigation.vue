@@ -26,6 +26,7 @@
 
 <script lang="ts">
   import { Component, Vue } from 'vue-property-decorator';
+  import { browser } from 'webextension-polyfill-ts';
 
   import AppSearch from './AppSearch.vue';
 
@@ -38,18 +39,24 @@
     colorScheme: string =
       window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 
-    mounted() {
-      this.initColorScheme();
+    async mounted() {
+      console.log('original', this.colorScheme);
+      await this.initColorScheme();
       this.initColorSchemeHandler();
+      console.log('after everything', this.colorScheme);
     }
 
-    initColorScheme() {
-      const colorSchemeInStorage: string = JSON.parse(localStorage.getItem('color-scheme')!);
-      this.colorScheme = colorSchemeInStorage ?? this.colorScheme;
+    async initColorScheme() {
+      const item = await browser.storage.local.get('color-scheme');
+      const colorScheme: string | undefined = item['color-scheme'];
+      console.log(typeof colorScheme);
+      console.log('current actual colorscheme is', this.colorScheme);
+      console.log('initColorScheme', colorScheme);
+      this.colorScheme = colorScheme ?? this.colorScheme;
       document.body.setAttribute('color-scheme', this.colorScheme);
     }
 
-    toggleColorScheme() {
+    async toggleColorScheme() {
       switch (this.colorScheme) {
         case 'light':
           this.colorScheme = 'dark';
@@ -58,19 +65,23 @@
           this.colorScheme = 'light';
           break;
       }
-      localStorage.setItem('color-scheme', JSON.stringify(this.colorScheme));
+      await browser.storage.local.set({
+        'color-scheme': this.colorScheme
+      });
       document.body.setAttribute('color-scheme', this.colorScheme);
     }
 
     initColorSchemeHandler() {
       const mql = window.matchMedia('(prefers-color-scheme: light)');
-      mql.addEventListener('change', (e) => {
+      mql.addEventListener('change', async (e) => {
         if (e.matches) {
           this.colorScheme = 'light';
         } else {
           this.colorScheme = 'dark';
         }
-        localStorage.setItem('color-scheme', JSON.stringify(this.colorScheme));
+        await browser.storage.local.set({
+          'color-scheme': this.colorScheme
+        })
         document.body.setAttribute('color-scheme', this.colorScheme);
       });
     }

@@ -3,7 +3,7 @@
   "name": "tabble",
   "version": "1.0",
   "description": "View your tabs and windows from one place.",
-  "permissions": ["<all_urls>", "tabs"],
+  "permissions": ["<all_urls>", "tabs", "storage"],
   "background": {
     "scripts": ["dist/background.js"]
   },
