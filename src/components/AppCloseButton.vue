@@ -1,8 +1,17 @@
 <template>
-  <span class="close-icon" tabindex="0" role="button">X</span>
+  <button class="close-icon" :title="title" :aria-label="title">X</button>
 </template>
 
 <script lang="ts">
   import { Component, Vue, Prop } from 'vue-property-decorator';
-  export default class AppCloseButton extends Vue {}
+  export default class AppCloseButton extends Vue {
+    @Prop(String) title: string | undefined;
+  }
 </script>
+
+<style lang="scss" scoped>
+  button {
+    background: transparent;
+    border: none;
+  }
+</style>
