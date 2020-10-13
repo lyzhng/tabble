@@ -1,16 +1,7 @@
 <template>
   <span id="top" role="button" tabindex="0">
     <a href="#container" title="Go back to top">
-      <svg
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 32 32"
-        width="32"
-        height="32"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11l7-7 7 7M5 19l7-7 7 7"></path>
-      </svg>
+      <img src="https://api.iconify.design/ant-design:up-outlined.svg?color=white" height="32" width="32" />
     </a>
   </span>
 </template>
@@ -26,7 +17,7 @@
 <style lang="scss" scoped>
   #top {
     position: fixed;
-    bottom: 0;
-    right: 0;
+    bottom: 0.5rem;
+    right: 0.5rem;
   }
 </style>

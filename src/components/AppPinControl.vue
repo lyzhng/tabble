@@ -1,7 +1,12 @@
 <template>
   <div>
-    <button v-if="pinned" @click.prevent.stop="togglePin" title="Unpin tab" aria-label="Unpin tab">&#128204;</button>
-    <button v-else @click.prevent.stop="togglePin" title="Pin tab" aria-label="Pin tab">&#129527;</button>
+    <button v-if="pinned" @click.prevent.stop="togglePin" title="Unpin tab" aria-label="Unpin tab">
+      <!-- &#128204; -->
+      <img src="https://api.iconify.design/ic:baseline-pin-off.svg?color=white" width="16" height="16" />
+    </button>
+    <button v-else @click.prevent.stop="togglePin" title="Pin tab" aria-label="Pin tab">
+      <img src="https://api.iconify.design/ic:sharp-pin.svg?color=white" width="16" height="16" />
+    </button>
   </div>
 </template>
 
@@ -32,7 +37,7 @@
 
 <style lang="scss" scoped>
   div {
-    display: inline-block;
+    display: inline;
   }
 
   button {
@@ -41,5 +46,9 @@
     &:hover {
       cursor: pointer;
     }
+  }
+
+  img {
+    vertical-align: middle;
   }
 </style>
