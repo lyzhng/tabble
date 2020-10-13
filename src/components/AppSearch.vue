@@ -1,8 +1,12 @@
 <template>
   <form @submit.prevent.stop role="search">
-    <input type="text" v-model="query" @input="searchForTabs()" placeholder="Search" id="search" autocomplete="off" />
-    <button type="button" @click.prevent.stop="reset">Reset</button>
-    <button type="button" @click.prevent.stop="showOptions = !showOptions">Options</button>
+    <div id="general-search">
+      <input type="text" v-model="query" @input="searchForTabs()" placeholder="Search" id="search" autocomplete="off" />
+      <div id="search-buttons">
+        <button type="button" @click.prevent.stop="reset">Reset</button>
+        <button type="button" @click.prevent.stop="showOptions = !showOptions">Options</button>
+      </div>
+    </div>
     <div id="search-options" v-if="showOptions">
       <label for="searchHostname"
         ><input
@@ -150,11 +154,29 @@
     margin: 0 0.5rem;
   }
 
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+
   #search-options {
     margin: 1rem 0;
     display: flex;
-    gap: 2.5rem;
+    gap: 0.5rem;
     justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    flex: 1;
+  }
+
+  #general-search {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 0.5rem;
     align-items: center;
   }
 </style>
